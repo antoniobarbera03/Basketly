@@ -5,381 +5,141 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Basketly - Confronto Dettagliato (Geo)</title>
     <style>
-        :root {
-            --primary-color: #27ae60;
-            --bg-color: #f3f4f6;
-            --text-color: #1a1a1a;
-            --card-bg: #ffffff;
-            --danger-color: #e74c3c;
-            --esselunga: #1c3c6d;
-            --lidl: #0050AA;
-            --carrefour: #1e5bc6;
-            --tigros: #0066cc;
-            --conad: #da291c;
-        }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--bg-color);
-            margin: 0;
-            color: var(--text-color);
-            padding-bottom: 120px;
-        }
-        header {
-            background: white;
-            padding: 15px 20px 20px;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-            border-bottom-left-radius: 20px;
-            border-bottom-right-radius: 20px;
-        }
-        .header-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-        .logo {
-            font-weight: 900;
-            font-size: 1.6rem;
-            color: var(--primary-color);
-            letter-spacing: -1px;
-        }
-        .logo span { color: #2c3e50; }
-        .location-badge {
-            background: #f1f3f4;
-            padding: 8px 12px;
-            border-radius: 12px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-        .geo-row {
-            margin-top: 8px;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            align-items: center;
-            font-size: 0.85rem;
-        }
-        .geo-row input[type="text"] {
-            padding: 8px 10px;
-            border-radius: 10px;
-            border: 1px solid #ddd;
-            font-size: 0.85rem;
-        }
-        .geo-btn {
-            padding: 8px 12px;
-            border-radius: 10px;
-            border: none;
-            background: var(--primary-color);
-            color: white;
-            font-size: 0.8rem;
-            font-weight: 600;
-            cursor: pointer;
-        }
-        .geo-status {
-            font-size: 0.8rem;
-            color: #555;
-        }
-        .range-box {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            background: #f1f3f4;
-            padding: 6px 10px;
-            border-radius: 999px;
-        }
-        .range-box input[type="range"] {
-            width: 140px;
-        }
-        .range-value {
-            font-weight: 600;
-            font-size: 0.85rem;
-            min-width: 55px;
-            text-align: right;
-        }
-        .search-row {
-            display: flex;
-            gap: 10px;
-            margin-top: 10px;
-        }
-        .search-box { flex: 1; }
-        .search-box input {
-            width: 100%;
-            padding: 14px 15px 14px 45px;
-            border: 2px solid #eee;
-            border-radius: 14px;
-            font-size: 1rem;
-            outline: none;
-            background: #f9f9f9 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23999' viewBox='0 0 16 16'%3E%3Cpath d='M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z'/%3E%3C/svg%3E") no-repeat 15px center;
-            box-sizing: border-box;
-        }
-        .filter-box select {
-            padding: 10px 12px;
-            border-radius: 14px;
-            border: 2px solid #eee;
-            background: #f9f9f9;
-            font-size: 0.9rem;
-            outline: none;
-            min-width: 150px;
-        }
+<style>
+    :root {
+        --primary-color: #27ae60;
+        --bg-color: #f3f4f6;
+        --text-color: #1a1a1a;
+        --card-bg: #ffffff;
+        --danger-color: #e74c3c;
+        --esselunga: #1c3c6d;
+        --lidl: #0050AA;
+        --carrefour: #1e5bc6;
+        --tigros: #0066cc;
+        --conad: #da291c;
+    }
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        background-color: var(--bg-color);
+        margin: 0;
+        color: var(--text-color);
+        padding-bottom: 120px;
+    }
+    header {
+        background: white;
+        padding: 15px 20px 20px;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        border-bottom-left-radius: 20px;
+        border-bottom-right-radius: 20px;
+    }
+    .header-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+    .logo {
+        font-weight: 900;
+        font-size: 1.6rem;
+        color: var(--primary-color);
+        letter-spacing: -1px;
+    }
+    .logo span { color: #2c3e50; }
+    .location-badge {
+        background: #f1f3f4;
+        padding: 8px 12px;
+        border-radius: 12px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+    .geo-row {
+        margin-top: 8px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: center;
+        font-size: 0.85rem;
+    }
+    .geo-row input[type="text"] {
+        padding: 8px 10px;
+        border-radius: 10px;
+        border: 1px solid #ddd;
+        font-size: 0.85rem;
+    }
+    .geo-btn {
+        padding: 8px 12px;
+        border-radius: 10px;
+        border: none;
+        background: var(--primary-color);
+        color: white;
+        font-size: 0.8rem;
+        font-weight: 600;
+        cursor: pointer;
+    }
+    .geo-status {
+        font-size: 0.8rem;
+        color: #555;
+    }
+    .range-box {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: #f1f3f4;
+        padding: 6px 10px;
+        border-radius: 999px;
+    }
+    .range-box input[type="range"] {
+        width: 140px;
+    }
+    .range-value {
+        font-weight: 600;
+        font-size: 0.85rem;
+        min-width: 55px;
+        text-align: right;
+    }
+    .search-row {
+        display: flex;
+        gap: 10px;
+        margin-top: 10px;
+    }
+    .search-box { flex: 1; }
+    .search-box input {
+        width: 100%;
+        padding: 14px 15px 14px 45px;
+        border: 2px solid #eee;
+        border-radius: 14px;
+        font-size: 1rem;
+        outline: none;
+        background: #f9f9f9 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23999' viewBox='0 0 16 16'%3E%3Cpath d='M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z'/%3E%3C/svg%3E") no-repeat 15px center;
+        box-sizing: border-box;
+    }
+    .filter-box select {
+        padding: 10px 12px;
+        border-radius: 14px;
+        border: 2px solid #eee;
+        background: #f9f9f9;
+        font-size: 0.9rem;
+        outline: none;
+        min-width: 150px;
+    }
 
-        .product-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-            gap: 15px;
-            padding: 20px;
-        }
-        .product-card {
-            background: var(--card-bg);
-            border-radius: 16px;
-            padding: 15px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.03);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-        }
-        .product-icon { font-size: 3.5rem; margin-bottom: 10px; }
-        .product-name {
-            font-weight: 700;
-            font-size: 0.9rem;
-            line-height: 1.3;
-            margin-bottom: 4px;
-            height: 2.4em;
-            overflow: hidden;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-        }
-        .product-size { font-size: 0.75rem; color: #888; margin-bottom: 12px; }
-        .controls {
-            display: flex;
-            width: 100%;
-            gap: 8px;
-            margin-top: auto;
-        }
-        .btn-main {
-            flex-grow: 1;
-            background: var(--text-color);
-            color: white;
-            border: none;
-            padding: 10px 0;
-            border-radius: 10px;
-            font-weight: 600;
-            font-size: 0.85rem;
-            cursor: pointer;
-        }
-        .btn-main.added { background: var(--primary-color); }
-        .btn-minus {
-            display: none;
-            width: 38px;
-            background: #fee2e2;
-            color: var(--danger-color);
-            border: none;
-            border-radius: 10px;
-            font-weight: 800;
-            font-size: 1.2rem;
-            cursor: pointer;
-            align-items: center;
-            justify-content: center;
-        }
-        .product-card[data-added="true"] .btn-minus { display: flex; }
+    .product-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 15px;
+        padding: 20px;
+    }
+    .product-card {
+        background: var(--card-bg);
+        border-radius: 16px;
+        padding: 15px;
 
-        .bottom-bar {
-            position: fixed;
-            bottom: 0; left: 0; right: 0;
-            background: white;
-            padding: 10px 16px;
-            box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            z-index: 900;
-            border-top: 1px solid #eee;
-            gap: 10px;
-        }
-        .basket-summary {
-            display: flex;
-            flex-direction: column;
-            min-width: 120px;
-        }
-        .basket-count { font-weight: 800; font-size: 1.1rem; }
-        .basket-link { font-size: 0.8rem; text-decoration: underline; cursor: pointer; color: #555; }
-
-        .bottom-controls {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            flex: 1;
-            justify-content: flex-end;
-        }
-        .pill-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            background: #f1f3f4;
-            border-radius: 999px;
-            padding: 6px 10px;
-            font-size: 0.8rem;
-            border: none;
-            cursor: pointer;
-            color: #333;
-        }
-        .pill-btn select {
-            border: none;
-            background: transparent;
-            font-size: 0.8rem;
-            outline: none;
-            cursor: pointer;
-        }
-        .pill-icon {
-            font-size: 0.9rem;
-        }
-        .toggle-complete {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            background: #f1f3f4;
-            border-radius: 999px;
-            padding: 4px 8px;
-            font-size: 0.75rem;
-        }
-        .toggle-switch {
-            position: relative;
-            width: 30px;
-            height: 16px;
-            background: #d1d5db;
-            border-radius: 999px;
-            cursor: pointer;
-        }
-        .toggle-switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-        .toggle-knob {
-            position: absolute;
-            top: 2px;
-            left: 2px;
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background: white;
-            transition: 0.2s;
-        }
-        .toggle-switch input:checked + .toggle-knob {
-            transform: translateX(12px);
-        }
-
-        .compare-btn {
-            background: var(--primary-color);
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 24px;
-            font-weight: 700;
-            font-size: 0.95rem;
-            box-shadow: 0 4px 15px rgba(39, 174, 96, 0.4);
-            cursor: pointer;
-            white-space: nowrap;
-        }
-
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.6);
-            backdrop-filter: blur(4px);
-            z-index: 2000;
-        }
-        .modal-card {
-            position: absolute;
-            bottom: 0;
-            width: 100%;
-            max-height: 85vh;
-            background: #f9fafb;
-            border-radius: 24px 24px 0 0;
-            overflow-y: auto;
-            animation: slideUp 0.3s ease-out;
-            box-sizing: border-box;
-        }
-        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-        .modal-header {
-            position: sticky; top: 0; background: white; padding: 20px;
-            display: flex; justify-content: space-between; align-items: center;
-            border-bottom: 1px solid #eee; z-index: 10;
-        }
-        .close-icon { font-size: 1.5rem; cursor: pointer; background:none; border:none; padding: 5px; }
-        .basket-list { padding: 20px; }
-        .basket-item {
-            background: white; padding: 15px; border-radius: 12px;
-            margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-        }
-        .b-icon { font-size: 2rem; margin-right: 15px; width: 40px; text-align: center; }
-        .b-qty-control { display: flex; align-items: center; gap: 8px; background: #f3f4f6; padding: 5px; border-radius: 8px; }
-        .b-btn { width: 28px; height: 28px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-        .b-minus { background: white; color: var(--danger-color); }
-        .b-plus { background: white; color: var(--primary-color); }
-
-        .result-card {
-            background: white; border-radius: 16px; padding: 20px; margin: 20px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05); position: relative; border: 2px solid transparent;
-        }
-        .result-card.best { border-color: var(--primary-color); background: #f0fdf4; }
-        .best-badge {
-            position: absolute; top: -10px; right: 20px; background: var(--primary-color);
-            color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 800;
-        }
-        .store-row { display: flex; align-items: center; gap: 15px; margin-bottom: 15px; border-bottom: 1px dashed #eee; padding-bottom: 15px; }
-        .store-avatar {
-            width: 50px; height: 50px; border-radius: 10px;
-            display: flex; align-items: center; justify-content: center;
-            color: white; font-weight: 900; font-size: 1.2rem;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        .s-esselunga { background-color: var(--esselunga); color: #ffcc00; position:relative; }
-        .s-esselunga:after { content:"S"; position:absolute; top: -5px; font-size: 1.5rem; }
-        .s-lidl { background-color: var(--lidl); color: #FFF000; border-bottom: 4px solid #E60A14; }
-        .s-carrefour { background-color: var(--carrefour); }
-        .s-tigros { background-color: var(--tigros); border-bottom: 4px solid #ffd700; }
-        .s-conad { background-color: white; border: 2px solid var(--conad); color: var(--conad); }
-        .total { font-size: 1.5rem; font-weight: 800; text-align: right; margin-top: 10px; color: var(--text-color); }
-
-        .toggle-btn {
-            width: 100%;
-            background: none;
-            border: none;
-            color: #666;
-            font-size: 0.85rem;
-            padding: 10px;
-            margin-top: 10px;
-            border-top: 1px solid #eee;
-            cursor: pointer;
-            text-align: center;
-            font-weight: 600;
-        }
-        .breakdown-list {
-            background: #f9f9f9;
-            margin-top: 10px;
-            padding: 10px;
-            border-radius: 8px;
-            display: none;
-        }
-        .breakdown-row {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.85rem;
-            padding: 4px 0;
-            border-bottom: 1px dashed #eee;
-        }
-        .breakdown-row:last-child { border-bottom: none; }
-        .bd-price { font-weight: 600; color: #333; }
     </style>
 </head>
 <body>
