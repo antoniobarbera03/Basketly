@@ -115,7 +115,7 @@
             border-radius: 14px;
             font-size: 1rem;
             outline: none;
-            background: #f9f9f9 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23999' viewBox='0 0 16 16'%3E%3Cpath d='M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z'/%3E%3C/svg%3E") no-repeat 15px center;
+            background: #f9f9f9 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23999' viewBox='0 0 16 16'%3E%3Cpath d='M11.742 10.344a6.5 6.5 0 1 [...]
             box-sizing: border-box;
         }
         .filter-box select {
@@ -380,6 +380,18 @@
         }
         .breakdown-row:last-child { border-bottom: none; }
         .bd-price { font-weight: 600; color: #333; }
+
+        /* New styles for timestamp & source metadata */
+        .price-meta {
+            font-size: 0.78rem;
+            color: #555;
+            margin-top: 4px;
+        }
+        .store-meta {
+            font-size: 0.82rem;
+            color: #555;
+            margin-top: 8px;
+        }
     </style>
 </head>
 <body>
@@ -631,7 +643,6 @@
       prices: { esselunga: 3.49, lidl: 3.39, carrefour: 3.29, tigros: 3.35, conad: 3.40 } }
 ];
 
-
     const stores = {
         esselunga: { name: "Esselunga", class: "s-esselunga", short: "E" },
         lidl: { name: "Lidl", class: "s-lidl", short: "L" },
@@ -647,6 +658,47 @@
         tigros:    { lat: 45.505, lon: 9.160 },
         conad:     { lat: 45.474, lon: 9.214 }
     };
+
+    // ===== Helper functions for fake timestamps & sources (coherent but fake) =====
+    function formatTimestamp(d) {
+      const dd = String(d.getDate()).padStart(2,'0');
+      const mm = String(d.getMonth()+1).padStart(2,'0');
+      const hh = String(d.getHours()).padStart(2,'0');
+      const min = String(d.getMinutes()).padStart(2,'0');
+      return `Aggiornato il: ${dd}/${mm} – ore ${hh}:${min}`;
+    }
+
+    function deterministicOffsetFromString(s) {
+      let acc = 0;
+      for (let i = 0; i < s.length; i++) acc = (acc + s.charCodeAt(i) * (i+1)) % 120;
+      return acc;
+    }
+
+    function getFakeTimestamp(storeKey, itemId) {
+      const now = new Date();
+      const storeOffset = deterministicOffsetFromString(storeKey || 'store') % 90; // up to 89 mins
+      const itemOffset = itemId ? (itemId % 13) : 0; // small per-item variation
+      const ts = new Date(now.getTime() - (storeOffset + itemOffset) * 60 * 1000);
+      return formatTimestamp(ts);
+    }
+
+    function getFakeSource(storeKey) {
+      const pretty = storeKey ? (storeKey.charAt(0).toUpperCase() + storeKey.slice(1)) : 'Demo';
+      return `Fonte: Volantino ${pretty} (demo)`;
+    }
+
+    function makePriceMetaRow(storeKey, itemId) {
+      const ts = getFakeTimestamp(storeKey, itemId);
+      const src = getFakeSource(storeKey);
+      return `<div class="price-meta">${ts} • ${src}</div>`;
+    }
+
+    function makeStoreMetaRow(storeKey) {
+      const ts = getFakeTimestamp(storeKey);
+      const src = getFakeSource(storeKey);
+      return `<div class="store-meta">${ts} • ${src}</div>`;
+    }
+    // =========================================================================
 
     let basket = {};
     let userLocation = null;
@@ -852,7 +904,7 @@
             const missingItems = [];
 
             const groupedLines = {};
-            const categoryOrder = ["Ortofrutta","Carne","Pesce","Salumi/Formaggi","Gastronomia","Latticini","Panetteria","Surgelati","Dispensa","Snack/Dolci","Colazione","Bevande","Cura Casa","Cura Persona","Animali","Casalinghi"];
+            const categoryOrder = ["Ortofrutta","Carne","Pesce","Salumi/Formaggi","Gastronomia","Latticini","Panetteria","Surgelati","Dispensa","Snack/Dolci","Colazione","Bevande","Cura Casa","Cura Persona","Animali","Casalinghi","Altro",""];
 
             Object.keys(basket).forEach(itemId => {
                 const p = products.find(x => x.id == itemId);
@@ -870,6 +922,7 @@
                             <span>${qty}x ${p.name}</span>
                             <span class="bd-price">€${itemTotal.toFixed(2)}</span>
                         </div>
+                        ${makePriceMetaRow(key, p.id)}
                     `);
                 } else {
                     missingItems.push(p);
@@ -878,6 +931,7 @@
                             <span>${qty}x ${p.name}</span>
                             <span class="bd-price">NON DISP.</span>
                         </div>
+                        ${makePriceMetaRow(key, p.id)}
                     `;
                     groupedLines[cat].push(line);
                     missingHtml += line;
@@ -979,6 +1033,7 @@
                         </div>
                     </div>
                     <div class="total">€${res.total.toFixed(2)}</div>
+                    ${makeStoreMetaRow(res.key)}
                     <button class="toggle-btn" id="btn-${res.key}" onclick="toggleBreakdown('${res.key}')">⬇ Vedi dettaglio spesa</button>
                     ${res.breakdown}
                 </div>
@@ -999,5 +1054,6 @@
     document.getElementById("typeFilter").addEventListener("change", renderProducts);
     renderProducts();
 </script>
+
 </body>
 </html>
