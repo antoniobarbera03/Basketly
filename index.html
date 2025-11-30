@@ -1,10 +1,9 @@
-````html name=index.html url=https://github.com/antoniobarbera03/Basketly/blob/14178763dfa9a8d623adcbdf97f033f0c9ecd454/index.html
 <!DOCTYPE html>
 <html lang="it">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Basketly - Risparmia sulla tua spesa con un click</title>
+    <title>Basketly - Confronto Dettagliato (Geo)</title>
     <style>
         :root {
             --primary-color: #27ae60;
@@ -116,7 +115,7 @@
             border-radius: 14px;
             font-size: 1rem;
             outline: none;
-            background: #f9f9f9 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23999' viewBox='0 0 16 16'%3E%3Cpath d='M11.742 10.344a6.5 6.5 0 1 [...]
+            background: #f9f9f9 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23999' viewBox='0 0 16 16'%3E%3Cpath d='M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z'/%3E%3C/svg%3E") no-repeat 15px center;
             box-sizing: border-box;
         }
         .filter-box select {
@@ -382,16 +381,15 @@
         .breakdown-row:last-child { border-bottom: none; }
         .bd-price { font-weight: 600; color: #333; }
 
-        /* New styles for timestamp & source metadata */
-        .price-meta {
-            font-size: 0.78rem;
-            color: #555;
-            margin-top: 4px;
+        /* New small meta styles for timestamps and sources */
+        .meta-small {
+            font-size: 0.75rem;
+            color: #586069;
+            margin-top: 6px;
         }
-        .store-meta {
-            font-size: 0.82rem;
-            color: #555;
-            margin-top: 8px;
+        .meta-small .source {
+            font-weight: 700;
+            color: #333;
         }
     </style>
 </head>
@@ -483,166 +481,137 @@
 </div>
 
 <script>
-   const products = [
-    // ORTOFRUTTA
-    { id: 1, category: "Ortofrutta", type: "perishable", name: "Mele Golden", size: "1kg", icon: "🍏",
-      prices: { esselunga: 2.09, lidl: 1.79, carrefour: 2.19, tigros: 2.15, conad: 2.05 } },
-    { id: 2, category: "Ortofrutta", type: "perishable", name: "Banane", size: "1kg", icon: "🍌",
-      prices: { esselunga: 1.59, lidl: 1.39, carrefour: 1.69, tigros: 1.65, conad: 1.58 } },
-    { id: 3, category: "Ortofrutta", type: "perishable", name: "Insalata Mista in Busta", size: "200g", icon: "🥬",
-      prices: { esselunga: 1.09, lidl: 0.99, carrefour: 1.19, tigros: 1.05, conad: 1.12 } },
-
-    // CARNE
-    { id: 10, category: "Carne", type: "perishable", name: "Petto di Pollo a Fette", size: "500g", icon: "🍗",
-      prices: { esselunga: 4.99, lidl: 4.89, carrefour: 5.29, tigros: 4.95, conad: 5.05 } },
-    { id: 11, category: "Carne", type: "perishable", name: "Macinato di Manzo", size: "500g", icon: "🥩",
-      prices: { esselunga: 4.79, lidl: 4.69, carrefour: 4.99, tigros: 4.75, conad: 4.90 } },
-    { id: 12, category: "Carne", type: "perishable", name: "Fettine di Vitello", size: "400g", icon: "🥩",
-      prices: { esselunga: 7.39, lidl: 7.49, carrefour: 7.69, tigros: 7.25, conad: 7.50 } },
-
-    // PESCE
-    { id: 20, category: "Pesce", type: "perishable", name: "Salmone Fresco a Tranci", size: "300g", icon: "🐟",
-      prices: { esselunga: 7.99, lidl: 7.89, carrefour: 7.79, tigros: 7.85, conad: 8.10 } },
-    { id: 21, category: "Pesce", type: "perishable", name: "Filetti di Merluzzo Freschi", size: "400g", icon: "🐟",
-      prices: { esselunga: 6.39, lidl: 6.29, carrefour: 6.19, tigros: 6.25, conad: 6.35 } },
-    { id: 22, category: "Pesce", type: "perishable", name: "Gamberi Sgusciati", size: "250g", icon: "🦐",
-      prices: { esselunga: 5.99, lidl: 5.89, carrefour: 6.09, tigros: 5.95, conad: 6.05 } },
-
-    // SALUMI / FORMAGGI
-    { id: 30, category: "Salumi/Formaggi", type: "perishable", name: "Prosciutto Cotto Rovagnati", size: "120g", icon: "🥓",
-      prices: { esselunga: 2.29, lidl: 2.09, carrefour: 2.39, tigros: 2.25, conad: 2.30 } },
-    { id: 31, category: "Salumi/Formaggi", type: "perishable", name: "Prosciutto Crudo di Parma", size: "100g", icon: "🥓",
-      prices: { esselunga: 3.09, lidl: 2.99, carrefour: 3.19, tigros: 3.05, conad: 3.10 } },
-    { id: 32, category: "Salumi/Formaggi", type: "perishable", name: "Mozzarella Galbani Santa Lucia", size: "3x100g", icon: "🧀",
-      prices: { esselunga: 2.89, lidl: 2.79, carrefour: 2.99, tigros: 2.90, conad: 2.95 } },
-
-    // GASTRONOMIA
-    { id: 40, category: "Gastronomia", type: "perishable", name: "Lasagne Pronte al Ragù", size: "1 porzione", icon: "🍲",
-      prices: { esselunga: 4.89, lidl: 4.19, carrefour: 5.09, tigros: 4.95, conad: 5.00 } },
-    { id: 41, category: "Gastronomia", type: "perishable", name: "Insalata di Riso Pronta", size: "300g", icon: "🥗",
-      prices: { esselunga: 3.39, lidl: 2.99, carrefour: 3.69, tigros: 3.45, conad: 3.50 } },
-    { id: 42, category: "Gastronomia", type: "perishable", name: "Pollo allo Spiedo", size: "1 pezzo", icon: "🍗",
-      prices: { esselunga: 7.99, lidl: 7.49, carrefour: 8.29, tigros: 7.90, conad: 8.10 } },
-
-    // LATTICINI
-    { id: 50, category: "Latticini", type: "perishable", name: "Latte Parzialmente Scremato Granarolo", size: "1L", icon: "🥛",
-      prices: { esselunga: 1.39, lidl: 1.29, carrefour: 1.45, tigros: 1.35, conad: 1.38 } },
-    { id: 51, category: "Latticini", type: "perishable", name: "Yogurt Bianco Müller", size: "2x125g", icon: "🥣",
-      prices: { esselunga: 1.09, lidl: 0.99, carrefour: 1.19, tigros: 1.05, conad: 1.08 } },
-    { id: 52, category: "Latticini", type: "perishable", name: "Burro Galbani Santa Lucia", size: "250g", icon: "🧈",
-      prices: { esselunga: 2.39, lidl: 2.29, carrefour: 2.59, tigros: 2.45, conad: 2.48 } },
-
-    // PANETTERIA
-    { id: 60, category: "Panetteria", type: "perishable", name: "Pane Casereccio", size: "500g", icon: "🍞",
-      prices: { esselunga: 2.09, lidl: 1.69, carrefour: 2.29, tigros: 1.99, conad: 2.05 } },
-    { id: 61, category: "Panetteria", type: "perishable", name: "Baguette", size: "300g", icon: "🥖",
-      prices: { esselunga: 1.39, lidl: 1.19, carrefour: 1.49, tigros: 1.29, conad: 1.35 } },
-    { id: 62, category: "Panetteria", type: "perishable", name: "Brioche Vuota", size: "1 pezzo", icon: "🥐",
-      prices: { esselunga: 1.05, lidl: 0.89, carrefour: 1.15, tigros: 0.99, conad: 1.10 } },
-
-    // SURGELATI
-    { id: 70, category: "Surgelati", type: "longlife", name: "Buitoni Pizza Margherita Surgelata", size: "350g", icon: "🍕",
-      prices: { esselunga: 2.59, lidl: 2.19, carrefour: 2.49, tigros: 2.45, conad: 2.55 } },
-    { id: 71, category: "Surgelati", type: "longlife", name: "Verdure Miste Surgelate", size: "600g", icon: "🥦",
-      prices: { esselunga: 2.39, lidl: 1.99, carrefour: 2.29, tigros: 2.25, conad: 2.30 } },
-    { id: 72, category: "Surgelati", type: "longlife", name: "Gelato Alla Vaniglia", size: "500ml", icon: "🍨",
-      prices: { esselunga: 3.39, lidl: 2.99, carrefour: 3.29, tigros: 3.20, conad: 3.30 } },
-
-    // DISPENSA
-    { id: 80, category: "Dispensa", type: "longlife", name: "Barilla Spaghetti N.5", size: "500g", icon: "🍝",
-      prices: { esselunga: 1.19, lidl: 1.09, carrefour: 1.25, tigros: 1.22, conad: 1.20 } },
-    { id: 81, category: "Dispensa", type: "longlife", name: "De Cecco Spaghetti", size: "500g", icon: "🍝",
-      prices: { esselunga: 1.49, lidl: 1.55, carrefour: 1.39, tigros: 1.48, conad: 1.52 } },
-    { id: 82, category: "Dispensa", type: "longlife", name: "Rummo Spaghetti N.3", size: "500g", icon: "🍝",
-      prices: { esselunga: 1.69, lidl: 1.75, carrefour: 1.59, tigros: 1.70, conad: 1.72 } },
-    { id: 83, category: "Dispensa", type: "longlife", name: "Barilla Penne Rigate", size: "500g", icon: "🍝",
-      prices: { esselunga: 1.19, lidl: 1.09, carrefour: 1.25, tigros: 1.22, conad: 1.20 } },
-    { id: 84, category: "Dispensa", type: "longlife", name: "De Cecco Penne Rigate", size: "500g", icon: "🍝",
-      prices: { esselunga: 1.49, lidl: 1.55, carrefour: 1.39, tigros: 1.48, conad: 1.52 } },
-    { id: 85, category: "Dispensa", type: "longlife", name: "La Molisana Penne Rigate", size: "500g", icon: "🍝",
-      prices: { esselunga: 1.39, lidl: 1.35, carrefour: 1.45, tigros: 1.38, conad: 1.40 } },
-    { id: 90, category: "Dispensa", type: "longlife", name: "Riso Arborio Scotti", size: "1kg", icon: "🍚",
-      prices: { esselunga: 2.69, lidl: 2.79, carrefour: 2.59, tigros: 2.65, conad: 2.70 } },
-    { id: 91, category: "Dispensa", type: "longlife", name: "Cirio Passata di Pomodoro", size: "700g", icon: "🍅",
-      prices: { esselunga: 1.59, lidl: 1.49, carrefour: 1.55, tigros: 1.52, conad: 1.58 } },
-    { id: 92, category: "Dispensa", type: "longlife", name: "Mutti Passata di Pomodoro", size: "700g", icon: "🍅",
-      prices: { esselunga: 1.69, lidl: 1.79, carrefour: 1.65, tigros: 1.70, conad: 1.72 } },
-    { id: 93, category: "Dispensa", type: "longlife", name: "Rio Mare Tonno all'Olio di Oliva 3x80g", size: "3x80g", icon: "🐟",
-      prices: { esselunga: 4.39, lidl: 4.29, carrefour: 4.35, tigros: 4.30, conad: 4.38 } },
-    { id: 94, category: "Dispensa", type: "longlife", name: "Manzotin Carne in Gelatina", size: "140g", icon: "🥫",
-      prices: { esselunga: 2.19, lidl: 2.09, carrefour: 2.25, tigros: 2.20, conad: 2.22 } },
-    { id: 95, category: "Dispensa", type: "longlife", name: "Barilla Sugo Pronto all'Arrabbiata", size: "400g", icon: "🍅",
-      prices: { esselunga: 2.19, lidl: 2.09, carrefour: 2.29, tigros: 2.22, conad: 2.25 } },
-    { id: 96, category: "Dispensa", type: "longlife", name: "Borlotti in Scatola Valfrutta", size: "400g", icon: "🫘",
-      prices: { esselunga: 1.05, lidl: 0.99, carrefour: 1.09, tigros: 1.02, conad: 1.08 } },
-    { id: 97, category: "Dispensa", type: "longlife", name: "Cracker Salati Saiwa", size: "500g", icon: "🧂",
-      prices: { esselunga: 2.19, lidl: 1.99, carrefour: 2.29, tigros: 2.15, conad: 2.20 } },
-    { id: 98, category: "Snack/Dolci", type: "longlife", name: "Mulino Bianco Pan di Stelle", size: "350g", icon: "⭐",
-      prices: { esselunga: 2.99, lidl: 2.89, carrefour: 2.95, tigros: 2.92, conad: 2.98 } },
-    { id: 99, category: "Dispensa", type: "longlife", name: "Pomodori Pelati Mutti", size: "400g", icon: "🧺",
-      prices: { esselunga: 1.39, lidl: 1.29, carrefour: 1.35, tigros: 1.32, conad: 1.38 } },
-
-    // SNACK / COLAZIONE
-    { id: 100, category: "Snack/Dolci", type: "longlife", name: "San Carlo Patatine Classiche", size: "180g", icon: "🥔",
-      prices: { esselunga: 1.79, lidl: 1.69, carrefour: 1.75, tigros: 1.72, conad: 1.78 } },
-    { id: 101, category: "Snack/Dolci", type: "longlife", name: "Pavesi Gocciole", size: "500g", icon: "🍪",
-      prices: { esselunga: 2.69, lidl: 2.59, carrefour: 2.65, tigros: 2.60, conad: 2.68 } },
-    { id: 102, category: "Snack/Dolci", type: "longlife", name: "Tavoletta di Cioccolato Novi Fondente", size: "100g", icon: "🍫",
-      prices: { esselunga: 1.69, lidl: 1.59, carrefour: 1.65, tigros: 1.62, conad: 1.68 } },
-    { id: 110, category: "Colazione", type: "longlife", name: "Kellogg's Corn Flakes", size: "375g", icon: "🥣",
-      prices: { esselunga: 2.39, lidl: 2.19, carrefour: 2.29, tigros: 2.25, conad: 2.35 } },
-    { id: 111, category: "Colazione", type: "longlife", name: "Mulino Bianco Fette Biscottate Integrali", size: "320g", icon: "🍞",
-      prices: { esselunga: 1.99, lidl: 1.79, carrefour: 1.89, tigros: 1.85, conad: 1.95 } },
-    { id: 112, category: "Colazione", type: "longlife", name: "Crema Spalmabile alla Nocciola Nutella", size: "450g", icon: "🍫",
-      prices: { esselunga: 4.29, lidl: 4.39, carrefour: 4.19, tigros: 4.25, conad: 4.30 } },
-
-    // BEVANDE
-    { id: 120, category: "Bevande", type: "longlife", name: "Acqua Naturale 1,5L", size: "1.5L", icon: "💧",
-      prices: { esselunga: 0.39, lidl: 0.25, carrefour: 0.45, tigros: 0.40, conad: 0.42 } },
-    { id: 121, category: "Bevande", type: "longlife", name: "Bibita Tipo Cola", size: "1.5L", icon: "🥤",
-      prices: { esselunga: 1.39, lidl: 0.99, carrefour: 1.49, tigros: 1.29, conad: 1.35 } },
-    { id: 122, category: "Bevande", type: "longlife", name: "Succo di Arancia 100%", size: "1L", icon: "🧃",
-      prices: { esselunga: 1.79, lidl: 1.29, carrefour: 1.89, tigros: 1.80, conad: 1.82 } },
-    { id: 123, category: "Bevande", type: "longlife", name: "Tè Freddo Pesca Lipton 1,5L", size: "1.5L", icon: "🧋",
-      prices: { esselunga: 1.79, lidl: 1.49, carrefour: 1.89, tigros: 1.75, conad: 1.80 },
-      availability: { esselunga: true, lidl: true, carrefour: true, tigros: true, conad: false } },
-
-    // CURA CASA
-    { id: 130, category: "Cura Casa", type: "household", name: "Nelsen Detersivo Piatti", size: "900ml", icon: "🧼",
-      prices: { esselunga: 2.19, lidl: 1.99, carrefour: 2.29, tigros: 2.15, conad: 2.20 } },
-    { id: 131, category: "Cura Casa", type: "household", name: "Dash Detersivo Lavatrice Liquido", size: "25 lavaggi", icon: "🧴",
-      prices: { esselunga: 6.49, lidl: 6.59, carrefour: 6.29, tigros: 6.40, conad: 6.45 } },
-    { id: 132, category: "Cura Casa", type: "household", name: "Scottex Carta Assorbente da Cucina", size: "2 rotoli", icon: "📜",
-      prices: { esselunga: 2.69, lidl: 2.49, carrefour: 2.59, tigros: 2.55, conad: 2.60 } },
-
-    // CURA PERSONA
-    { id: 140, category: "Cura Persona", type: "household", name: "Head & Shoulders Shampoo", size: "250ml", icon: "🧴",
-      prices: { esselunga: 3.49, lidl: 3.59, carrefour: 3.39, tigros: 3.45, conad: 3.50 } },
-    { id: 141, category: "Cura Persona", type: "household", name: "Mentadent Dentifricio", size: "75ml", icon: "🪥",
-      prices: { esselunga: 2.09, lidl: 1.99, carrefour: 2.05, tigros: 2.00, conad: 2.08 } },
-    { id: 142, category: "Cura Persona", type: "household", name: "Felce Azzurra Bagnoschiuma", size: "650ml", icon: "🛁",
-      prices: { esselunga: 2.99, lidl: 2.79, carrefour: 2.89, tigros: 2.85, conad: 2.95 } },
-
-    // ANIMALI
-    { id: 150, category: "Animali", type: "household", name: "Monge Crocchette per Cani", size: "1.5kg", icon: "🐶",
-      prices: { esselunga: 5.29, lidl: 5.09, carrefour: 5.19, tigros: 5.15, conad: 5.25 },
-      availability: { esselunga: true, lidl: true, carrefour: true, tigros: true, conad: true } },
-    { id: 151, category: "Animali", type: "household", name: "Monge Crocchette per Gatti", size: "1.5kg", icon: "🐱",
-      prices: { esselunga: 5.49, lidl: 5.59, carrefour: 5.39, tigros: 5.45, conad: 5.50 },
-      availability: { esselunga: true, lidl: true, carrefour: true, tigros: false, conad: true } },
-    { id: 152, category: "Animali", type: "household", name: "Lettiera per Gatti Agglomerante", size: "5kg", icon: "🧺",
-      prices: { esselunga: 4.99, lidl: 4.79, carrefour: 4.89, tigros: 4.85, conad: 4.95 },
-      availability: { esselunga: true, lidl: false, carrefour: true, tigros: true, conad: true } },
-
-    // CASALINGHI
-    { id: 160, category: "Casalinghi", type: "household", name: "Pellicola Trasparente", size: "30m", icon: "📦",
-      prices: { esselunga: 1.89, lidl: 1.69, carrefour: 1.79, tigros: 1.75, conad: 1.82 } },
-    { id: 161, category: "Casalinghi", type: "household", name: "Sacchetti Immondizia 50L", size: "20 pezzi", icon: "🗑️",
-      prices: { esselunga: 2.19, lidl: 2.09, carrefour: 2.15, tigros: 2.12, conad: 2.18 },
-      availability: { esselunga: true, lidl: true, carrefour: false, tigros: true, conad: true } },
-    { id: 162, category: "Casalinghi", type: "household", name: "Batterie AAA Alcaline (4 pezzi)", size: "4pz", icon: "🔋",
-      prices: { esselunga: 3.49, lidl: 3.39, carrefour: 3.29, tigros: 3.35, conad: 3.40 } }
-];
+    const products = [
+        { id: 1, category: "Ortofrutta", type: "perishable", name: "Mele Golden", size: "1kg", icon: "🍏",
+          prices: { esselunga: 2.19, lidl: 1.79, carrefour: 2.39, tigros: 2.25, conad: 2.20 } },
+        { id: 2, category: "Ortofrutta", type: "perishable", name: "Banane", size: "1kg", icon: "🍌",
+          prices: { esselunga: 1.69, lidl: 1.39, carrefour: 1.79, tigros: 1.75, conad: 1.68 } },
+        { id: 3, category: "Ortofrutta", type: "perishable", name: "Insalata Mista in Busta", size: "200g", icon: "🥬",
+          prices: { esselunga: 1.29, lidl: 0.99, carrefour: 1.39, tigros: 1.25, conad: 1.30 } },
+        { id: 10, category: "Carne", type: "perishable", name: "Petto di Pollo a Fette", size: "500g", icon: "🍗",
+          prices: { esselunga: 5.49, lidl: 4.79, carrefour: 5.79, tigros: 5.60, conad: 5.55 } },
+        { id: 11, category: "Carne", type: "perishable", name: "Macinato di Manzo", size: "500g", icon: "🥩",
+          prices: { esselunga: 5.29, lidl: 4.59, carrefour: 5.69, tigros: 5.40, conad: 5.50 } },
+        { id: 12, category: "Carne", type: "perishable", name: "Fettine di Vitello", size: "400g", icon: "🥩",
+          prices: { esselunga: 7.49, lidl: 6.79, carrefour: 7.89, tigros: 7.60, conad: 7.70 } },
+        { id: 20, category: "Pesce", type: "perishable", name: "Salmone Fresco a Tranci", size: "300g", icon: "🐟",
+          prices: { esselunga: 7.99, lidl: 6.99, carrefour: 8.49, tigros: 8.20, conad: 8.30 } },
+        { id: 21, category: "Pesce", type: "perishable", name: "Filetti di Merluzzo Freschi", size: "400g", icon: "🐟",
+          prices: { esselunga: 6.49, lidl: 5.79, carrefour: 6.79, tigros: 6.60, conad: 6.70 } },
+        { id: 22, category: "Pesce", type: "perishable", name: "Gamberi Sgusciati", size: "250g", icon: "🦐",
+          prices: { esselunga: 5.99, lidl: 4.99, carrefour: 6.29, tigros: 6.10, conad: 6.15 } },
+        { id: 30, category: "Salumi/Formaggi", type: "perishable", name: "Prosciutto Cotto Rovagnati", size: "120g", icon: "🥓",
+          prices: { esselunga: 2.39, lidl: 1.99, carrefour: 2.59, tigros: 2.49, conad: 2.45 } },
+        { id: 31, category: "Salumi/Formaggi", type: "perishable", name: "Prosciutto Crudo di Parma", size: "100g", icon: "🥓",
+          prices: { esselunga: 3.19, lidl: 2.79, carrefour: 3.39, tigros: 3.30, conad: 3.25 } },
+        { id: 32, category: "Salumi/Formaggi", type: "perishable", name: "Mozzarella Galbani Santa Lucia", size: "3x100g", icon: "🧀",
+          prices: { esselunga: 2.99, lidl: 2.79, carrefour: 3.09, tigros: 2.95, conad: 2.98 } },
+        { id: 40, category: "Gastronomia", type: "perishable", name: "Lasagne Pronte al Ragù", size: "1 porzione", icon: "🍲",
+          prices: { esselunga: 4.99, lidl: 3.99, carrefour: 5.29, tigros: 5.10, conad: 5.20 } },
+        { id: 41, category: "Gastronomia", type: "perishable", name: "Insalata di Riso Pronta", size: "300g", icon: "🥗",
+          prices: { esselunga: 3.49, lidl: 2.99, carrefour: 3.79, tigros: 3.60, conad: 3.65 } },
+        { id: 42, category: "Gastronomia", type: "perishable", name: "Pollo allo Spiedo", size: "1 pezzo", icon: "🍗",
+          prices: { esselunga: 7.99, lidl: 6.99, carrefour: 8.49, tigros: 8.20, conad: 8.30 } },
+        { id: 50, category: "Latticini", type: "perishable", name: "Latte Parzialmente Scremato Granarolo", size: "1L", icon: "🥛",
+          prices: { esselunga: 1.39, lidl: 1.29, carrefour: 1.45, tigros: 1.35, conad: 1.38 } },
+        { id: 51, category: "Latticini", type: "perishable", name: "Yogurt Bianco Müller", size: "2x125g", icon: "🥣",
+          prices: { esselunga: 1.09, lidl: 0.99, carrefour: 1.19, tigros: 1.05, conad: 1.08 } },
+        { id: 52, category: "Latticini", type: "perishable", name: "Burro Galbani Santa Lucia", size: "250g", icon: "🧈",
+          prices: { esselunga: 2.49, lidl: 2.09, carrefour: 2.69, tigros: 2.60, conad: 2.55 } },
+        { id: 60, category: "Panetteria", type: "perishable", name: "Pane Casereccio", size: "500g", icon: "🍞",
+          prices: { esselunga: 2.19, lidl: 1.69, carrefour: 2.39, tigros: 2.20, conad: 2.25 } },
+        { id: 61, category: "Panetteria", type: "perishable", name: "Baguette", size: "300g", icon: "🥖",
+          prices: { esselunga: 1.49, lidl: 1.19, carrefour: 1.59, tigros: 1.50, conad: 1.55 } },
+        { id: 62, category: "Panetteria", type: "perishable", name: "Brioche Vuota", size: "1 pezzo", icon: "🥐",
+          prices: { esselunga: 1.09, lidl: 0.89, carrefour: 1.19, tigros: 1.10, conad: 1.15 } },
+        { id: 70, category: "Surgelati", type: "longlife", name: "Buitoni Pizza Margherita Surgelata", size: "350g", icon: "🍕",
+          prices: { esselunga: 2.69, lidl: 2.19, carrefour: 2.79, tigros: 2.60, conad: 2.65 } },
+        { id: 71, category: "Surgelati", type: "longlife", name: "Verdure Miste Surgelate", size: "600g", icon: "🥦",
+          prices: { esselunga: 2.49, lidl: 1.99, carrefour: 2.69, tigros: 2.55, conad: 2.60 } },
+        { id: 72, category: "Surgelati", type: "longlife", name: "Gelato Alla Vaniglia", size: "500ml", icon: "🍨",
+          prices: { esselunga: 3.49, lidl: 2.79, carrefour: 3.79, tigros: 3.60, conad: 3.65 } },
+        { id: 80, category: "Dispensa", type: "longlife", name: "Barilla Spaghetti N.5", size: "500g", icon: "🍝",
+          prices: { esselunga: 1.19, lidl: 1.09, carrefour: 1.25, tigros: 1.22, conad: 1.20 } },
+        { id: 81, category: "Dispensa", type: "longlife", name: "De Cecco Spaghetti", size: "500g", icon: "🍝",
+          prices: { esselunga: 1.49, lidl: 1.39, carrefour: 1.59, tigros: 1.55, conad: 1.52 } },
+        { id: 82, category: "Dispensa", type: "longlife", name: "Rummo Spaghetti N.3", size: "500g", icon: "🍝",
+          prices: { esselunga: 1.69, lidl: 1.59, carrefour: 1.79, tigros: 1.75, conad: 1.72 } },
+        { id: 83, category: "Dispensa", type: "longlife", name: "Barilla Penne Rigate", size: "500g", icon: "🍝",
+          prices: { esselunga: 1.19, lidl: 1.09, carrefour: 1.25, tigros: 1.22, conad: 1.20 } },
+        { id: 84, category: "Dispensa", type: "longlife", name: "De Cecco Penne Rigate", size: "500g", icon: "🍝",
+          prices: { esselunga: 1.49, lidl: 1.39, carrefour: 1.59, tigros: 1.55, conad: 1.52 } },
+        { id: 85, category: "Dispensa", type: "longlife", name: "La Molisana Penne Rigate", size: "500g", icon: "🍝",
+          prices: { esselunga: 1.39, lidl: 1.29, carrefour: 1.49, tigros: 1.45, conad: 1.42 } },
+        { id: 90, category: "Dispensa", type: "longlife", name: "Riso Arborio Scotti", size: "1kg", icon: "🍚",
+          prices: { esselunga: 2.69, lidl: 2.39, carrefour: 2.89, tigros: 2.75, conad: 2.80 } },
+        { id: 91, category: "Dispensa", type: "longlife", name: "Cirio Passata di Pomodoro", size: "700g", icon: "🍅",
+          prices: { esselunga: 1.59, lidl: 1.49, carrefour: 1.69, tigros: 1.55, conad: 1.60 } },
+        { id: 92, category: "Dispensa", type: "longlife", name: "Mutti Passata di Pomodoro", size: "700g", icon: "🍅",
+          prices: { esselunga: 1.69, lidl: 1.59, carrefour: 1.79, tigros: 1.65, conad: 1.70 } },
+        { id: 93, category: "Dispensa", type: "longlife", name: "Rio Mare Tonno all'Olio di Oliva 3x80g", size: "3x80g", icon: "🐟",
+          prices: { esselunga: 4.39, lidl: 3.99, carrefour: 4.59, tigros: 4.49, conad: 4.50 } },
+        { id: 94, category: "Dispensa", type: "longlife", name: "Manzotin Carne in Gelatina", size: "140g", icon: "🥫",
+          prices: { esselunga: 2.29, lidl: 1.99, carrefour: 2.39, tigros: 2.30, conad: 2.35 } },
+        { id: 95, category: "Dispensa", type: "longlife", name: "Barilla Sugo Pronto all'Arrabbiata", size: "400g", icon: "🍅",
+          prices: { esselunga: 2.29, lidl: 1.99, carrefour: 2.49, tigros: 2.39, conad: 2.40 } },
+        { id: 96, category: "Dispensa", type: "longlife", name: "Borlotti in Scatola Valfrutta", size: "400g", icon: "🫘",
+          prices: { esselunga: 1.09, lidl: 0.89, carrefour: 1.19, tigros: 1.05, conad: 1.10 } },
+        { id: 97, category: "Dispensa", type: "longlife", name: "Cracker Salati Saiwa", size: "500g", icon: "🧂",
+          prices: { esselunga: 2.19, lidl: 1.79, carrefour: 2.39, tigros: 2.20, conad: 2.25 } },
+        { id: 98, category: "Snack/Dolci", type: "longlife", name: "Mulino Bianco Pan di Stelle", size: "350g", icon: "⭐",
+          prices: { esselunga: 2.99, lidl: 2.49, carrefour: 3.19, tigros: 3.05, conad: 3.10 } },
+        { id: 99, category: "Dispensa", type: "longlife", name: "Pomodori Pelati Mutti", size: "400g", icon: "🧺",
+          prices: { esselunga: 1.39, lidl: 1.09, carrefour: 1.49, tigros: 1.35, conad: 1.40 } },
+        { id: 100, category: "Snack/Dolci", type: "longlife", name: "San Carlo Patatine Classiche", size: "180g", icon: "🥔",
+          prices: { esselunga: 1.79, lidl: 1.59, carrefour: 1.89, tigros: 1.70, conad: 1.75 } },
+        { id: 101, category: "Snack/Dolci", type: "longlife", name: "Pavesi Gocciole", size: "500g", icon: "🍪",
+          prices: { esselunga: 2.69, lidl: 2.39, carrefour: 2.89, tigros: 2.59, conad: 2.60 } },
+        { id: 102, category: "Snack/Dolci", type: "longlife", name: "Tavoletta di Cioccolato Novi Fondente", size: "100g", icon: "🍫",
+          prices: { esselunga: 1.69, lidl: 1.39, carrefour: 1.79, tigros: 1.70, conad: 1.72 } },
+        { id: 110, category: "Colazione", type: "longlife", name: "Kellogg's Corn Flakes", size: "375g", icon: "🥣",
+          prices: { esselunga: 2.39, lidl: 1.79, carrefour: 2.49, tigros: 2.30, conad: 2.35 } },
+        { id: 111, category: "Colazione", type: "longlife", name: "Mulino Bianco Fette Biscottate Integrali", size: "320g", icon: "🍞",
+          prices: { esselunga: 1.99, lidl: 1.49, carrefour: 2.09, tigros: 1.95, conad: 2.00 } },
+        { id: 112, category: "Colazione", type: "longlife", name: "Crema Spalmabile alla Nocciola Nutella", size: "450g", icon: "🍫",
+          prices: { esselunga: 4.29, lidl: 3.99, carrefour: 4.49, tigros: 4.39, conad: 4.40 } },
+        { id: 120, category: "Bevande", type: "longlife", name: "Acqua Naturale 1,5L", size: "1.5L", icon: "💧",
+          prices: { esselunga: 0.39, lidl: 0.25, carrefour: 0.45, tigros: 0.40, conad: 0.42 } },
+        { id: 121, category: "Bevande", type: "longlife", name: "Bibita Tipo Cola", size: "1.5L", icon: "🥤",
+          prices: { esselunga: 1.39, lidl: 0.99, carrefour: 1.49, tigros: 1.29, conad: 1.35 } },
+        { id: 122, category: "Bevande", type: "longlife", name: "Succo di Arancia 100%", size: "1L", icon: "🧃",
+          prices: { esselunga: 1.79, lidl: 1.29, carrefour: 1.89, tigros: 1.80, conad: 1.82 } },
+        { id: 123, category: "Bevande", type: "longlife", name: "Tè Freddo Pesca Lipton 1,5L", size: "1.5L", icon: "🧋",
+          prices: { esselunga: 1.79, lidl: 1.49, carrefour: 1.89, tigros: 1.75, conad: 1.80 },
+          availability: { esselunga: true, lidl: true, carrefour: true, tigros: true, conad: false } },
+        { id: 130, category: "Cura Casa", type: "household", name: "Nelsen Detersivo Piatti", size: "900ml", icon: "🧼",
+          prices: { esselunga: 2.19, lidl: 1.69, carrefour: 2.39, tigros: 2.20, conad: 2.25 } },
+        { id: 131, category: "Cura Casa", type: "household", name: "Dash Detersivo Lavatrice Liquido", size: "25 lavaggi", icon: "🧴",
+          prices: { esselunga: 6.49, lidl: 4.79, carrefour: 6.79, tigros: 6.40, conad: 6.50 } },
+        { id: 132, category: "Cura Casa", type: "household", name: "Scottex Carta Assorbente da Cucina", size: "2 rotoli", icon: "📜",
+          prices: { esselunga: 2.69, lidl: 1.99, carrefour: 2.89, tigros: 2.75, conad: 2.80 } },
+        { id: 140, category: "Cura Persona", type: "household", name: "Head & Shoulders Shampoo", size: "250ml", icon: "🧴",
+          prices: { esselunga: 3.49, lidl: 2.99, carrefour: 3.69, tigros: 3.50, conad: 3.55 } },
+        { id: 141, category: "Cura Persona", type: "household", name: "Mentadent Dentifricio", size: "75ml", icon: "🪥",
+          prices: { esselunga: 2.09, lidl: 1.69, carrefour: 2.29, tigros: 2.10, conad: 2.15 } },
+        { id: 142, category: "Cura Persona", type: "household", name: "Felce Azzurra Bagnoschiuma", size: "650ml", icon: "🛁",
+          prices: { esselunga: 2.99, lidl: 2.39, carrefour: 3.19, tigros: 3.05, conad: 3.10 } },
+        { id: 150, category: "Animali", type: "household", name: "Monge Crocchette per Cani", size: "1.5kg", icon: "🐶",
+          prices: { esselunga: 5.29, lidl: 4.19, carrefour: 5.59, tigros: 5.30, conad: 5.35 },
+          availability: { esselunga: true, lidl: true, carrefour: true, tigros: true, conad: true } },
+        { id: 151, category: "Animali", type: "household", name: "Monge Crocchette per Gatti", size: "1.5kg", icon: "🐱",
+          prices: { esselunga: 5.49, lidl: 4.39, carrefour: 5.79, tigros: 5.50, conad: 5.55 },
+          availability: { esselunga: true, lidl: true, carrefour: true, tigros: false, conad: true } },
+        { id: 152, category: "Animali", type: "household", name: "Lettiera per Gatti Agglomerante", size: "5kg", icon: "🧺",
+          prices: { esselunga: 4.99, lidl: 3.79, carrefour: 5.29, tigros: 5.10, conad: 5.15 },
+          availability: { esselunga: true, lidl: false, carrefour: true, tigros: true, conad: true } },
+        { id: 160, category: "Casalinghi", type: "household", name: "Pellicola Trasparente", size: "30m", icon: "📦",
+          prices: { esselunga: 1.89, lidl: 1.29, carrefour: 1.99, tigros: 1.90, conad: 1.95 } },
+        { id: 161, category: "Casalinghi", type: "household", name: "Sacchetti Immondizia 50L", size: "20 pezzi", icon: "🗑️",
+          prices: { esselunga: 2.19, lidl: 1.69, carrefour: 2.39, tigros: 2.20, conad: 2.25 },
+          availability: { esselunga: true, lidl: true, carrefour: false, tigros: true, conad: true } },
+        { id: 162, category: "Casalinghi", type: "household", name: "Batterie AAA Alcaline (4 pezzi)", size: "4pz", icon: "🔋",
+          prices: { esselunga: 3.49, lidl: 2.49, carrefour: 3.69, tigros: 3.50, conad: 3.55 } }
+    ];
 
     const stores = {
         esselunga: { name: "Esselunga", class: "s-esselunga", short: "E" },
@@ -659,47 +628,6 @@
         tigros:    { lat: 45.505, lon: 9.160 },
         conad:     { lat: 45.474, lon: 9.214 }
     };
-
-    // ===== Helper functions for fake timestamps & sources (coherent but fake) =====
-    function formatTimestamp(d) {
-      const dd = String(d.getDate()).padStart(2,'0');
-      const mm = String(d.getMonth()+1).padStart(2,'0');
-      const hh = String(d.getHours()).padStart(2,'0');
-      const min = String(d.getMinutes()).padStart(2,'0');
-      return `Aggiornato il: ${dd}/${mm} – ore ${hh}:${min}`;
-    }
-
-    function deterministicOffsetFromString(s) {
-      let acc = 0;
-      for (let i = 0; i < s.length; i++) acc = (acc + s.charCodeAt(i) * (i+1)) % 120;
-      return acc;
-    }
-
-    function getFakeTimestamp(storeKey, itemId) {
-      const now = new Date();
-      const storeOffset = deterministicOffsetFromString(storeKey || 'store') % 90; // up to 89 mins
-      const itemOffset = itemId ? (itemId % 13) : 0; // small per-item variation
-      const ts = new Date(now.getTime() - (storeOffset + itemOffset) * 60 * 1000);
-      return formatTimestamp(ts);
-    }
-
-    function getFakeSource(storeKey) {
-      const pretty = storeKey ? (storeKey.charAt(0).toUpperCase() + storeKey.slice(1)) : 'Demo';
-      return `Fonte: Volantino ${pretty} (demo)`;
-    }
-
-    function makePriceMetaRow(storeKey, itemId) {
-      const ts = getFakeTimestamp(storeKey, itemId);
-      const src = getFakeSource(storeKey);
-      return `<div class="price-meta">${ts} • ${src}</div>`;
-    }
-
-    function makeStoreMetaRow(storeKey) {
-      const ts = getFakeTimestamp(storeKey);
-      const src = getFakeSource(storeKey);
-      return `<div class="store-meta">${ts} • ${src}</div>`;
-    }
-    // =========================================================================
 
     let basket = {};
     let userLocation = null;
@@ -724,6 +652,52 @@
         const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
         return R * c;
     }
+
+    // --- New helper functions to generate coherent fake timestamps and sources ---
+    function pad(n) { return (n < 10 ? '0' : '') + n; }
+
+    // base date for a store (varies deterministically by store key)
+    function getStoreBaseDate(storeKey) {
+        const now = new Date();
+        // deterministically offset minutes per store so timestamps vary but are consistent during a session
+        let seed = 0;
+        for (let i = 0; i < storeKey.length; i++) seed += storeKey.charCodeAt(i);
+        const minutesOffset = (seed % 180); // up to 3 hours difference
+        return new Date(now.getTime() - minutesOffset * 60 * 1000);
+    }
+
+    // timestamp for a specific product in a store (adds small deterministic offset by productId)
+    function fakeTimestampForPrice(storeKey, productId) {
+        const base = getStoreBaseDate(storeKey);
+        const extra = productId % 45; // up to 44 minutes extra difference between items
+        const d = new Date(base.getTime() - extra * 60 * 1000);
+        return formatFriendlyTimestamp(d);
+    }
+
+    // friendly formatting: if same day -> "oggi – ore HH:MM", else "DD/MM – ore HH:MM"
+    function formatFriendlyTimestamp(d) {
+        const now = new Date();
+        const sameDay = d.getDate() === now.getDate() && d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+        const hh = pad(d.getHours());
+        const mm = pad(d.getMinutes());
+        if (sameDay) {
+            return `oggi – ore ${hh}:${mm}`;
+        } else {
+            const dd = pad(d.getDate());
+            const mmn = pad(d.getMonth() + 1);
+            return `${dd}/${mmn} – ore ${hh}:${mm}`;
+        }
+    }
+
+    function fakeTimestampForStore(storeKey) {
+        return formatFriendlyTimestamp(getStoreBaseDate(storeKey));
+    }
+
+    function fakeSourceForStore(storeKey) {
+        // Explicitly mark as demo / fake source to be transparent
+        return `Volantino ${stores[storeKey].name} (demo)`;
+    }
+    // --- end helpers ---
 
     async function setUserLocation() {
         const addr = document.getElementById("addressInput").value.trim();
@@ -905,7 +879,7 @@
             const missingItems = [];
 
             const groupedLines = {};
-            const categoryOrder = ["Ortofrutta","Carne","Pesce","Salumi/Formaggi","Gastronomia","Latticini","Panetteria","Surgelati","Dispensa","Snack/Dolci","Colazione","Bevande","Cura Casa","Cura Persona","Animali","Casalinghi","Altro",""];
+            const categoryOrder = ["Ortofrutta","Carne","Pesce","Salumi/Formaggi","Gastronomia","Latticini","Panetteria","Surgelati","Dispensa","Snack/Dolci","Colazione","Bevande","Cura Casa","Cura Persona","Animali","Casalinghi"];
 
             Object.keys(basket).forEach(itemId => {
                 const p = products.find(x => x.id == itemId);
@@ -915,24 +889,32 @@
                 const cat = p.category || "Altro";
                 if (!groupedLines[cat]) groupedLines[cat] = [];
 
+                // generate fake timestamp and source
+                const ts = fakeTimestampForPrice(key, p.id);
+                const src = fakeSourceForStore(key);
+
                 if (isAvailable) {
                     const itemTotal = p.prices[key] * qty;
                     total += itemTotal;
                     groupedLines[cat].push(`
-                        <div class="breakdown-row">
-                            <span>${qty}x ${p.name}</span>
-                            <span class="bd-price">€${itemTotal.toFixed(2)}</span>
+                        <div style="padding:6px 0;">
+                            <div class="breakdown-row">
+                                <span>${qty}x ${p.name}</span>
+                                <span class="bd-price">€${itemTotal.toFixed(2)}</span>
+                            </div>
+                            <div class="meta-small">Aggiornato il: ${ts} · Fonte: <span class="source">${src}</span></div>
                         </div>
-                        ${makePriceMetaRow(key, p.id)}
                     `);
                 } else {
                     missingItems.push(p);
                     const line = `
-                        <div class="breakdown-row" style="color:#b91c1c;">
-                            <span>${qty}x ${p.name}</span>
-                            <span class="bd-price">NON DISP.</span>
+                        <div style="padding:6px 0;">
+                            <div class="breakdown-row" style="color:#b91c1c;">
+                                <span>${qty}x ${p.name}</span>
+                                <span class="bd-price">NON DISP.</span>
+                            </div>
+                            <div class="meta-small" style="color:#b91c1c;">Aggiornato il: ${ts} · Fonte: <span class="source">${src}</span></div>
                         </div>
-                        ${makePriceMetaRow(key, p.id)}
                     `;
                     groupedLines[cat].push(line);
                     missingHtml += line;
@@ -1018,23 +1000,29 @@
         results.forEach((res, idx) => {
             const isBest = idx === 0;
             const hasMissing = res.missingCount > 0;
+            // store-level fake timestamp and source
+            const storeTs = fakeTimestampForStore(res.key);
+            const storeSrc = fakeSourceForStore(res.key);
+
             container.innerHTML += `
                 <div class="result-card ${isBest ? 'best' : ''}">
                     ${isBest ? `<div class="best-badge">🏆 MIGLIORE</div>` : ''}
                     <div class="store-row">
                         <div class="store-avatar ${res.meta.class}">${res.meta.short}</div>
-                        <div>
+                        <div style="flex:1; min-width:0;">
                             <h3 style="margin:0; font-size:1.1rem">${res.meta.name}</h3>
                             <div style="font-size:0.85rem; color:#777">Distanza: ${res.distKm.toFixed(1)} km</div>
+                            <div style="font-size:0.8rem; color:#555; margin-top:6px;">
+                                Aggiornato il: ${storeTs} · Fonte: <span style="font-weight:700; color:#333;">${storeSrc}</span>
+                            </div>
                             ${hasMissing ? `
-                                <div style="font-size:0.8rem; color:#b91c1c; margin-top:4px;">
+                                <div style="font-size:0.8rem; color:#b91c1c; margin-top:8px;">
                                     ❗ Alcuni prodotti del carrello non sono disponibili in questo supermercato
                                 </div>
                             ` : ""}
                         </div>
                     </div>
                     <div class="total">€${res.total.toFixed(2)}</div>
-                    ${makeStoreMetaRow(res.key)}
                     <button class="toggle-btn" id="btn-${res.key}" onclick="toggleBreakdown('${res.key}')">⬇ Vedi dettaglio spesa</button>
                     ${res.breakdown}
                 </div>
@@ -1055,6 +1043,5 @@
     document.getElementById("typeFilter").addEventListener("change", renderProducts);
     renderProducts();
 </script>
-
 </body>
 </html>
