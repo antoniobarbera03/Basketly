@@ -1,1009 +1,805 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Basketly - Risparmia sulla tua spesa con un click</title>
-    <style>
-        :root {
-            --primary-color: #27ae60;
-            --bg-color: #f3f4f6;
-            --text-color: #1a1a1a;
-            --card-bg: #ffffff;
-            --danger-color: #e74c3c;
-            --esselunga: #1c3c6d;
-            --lidl: #0050AA;
-            --carrefour: #1e5bc6;
-            --tigros: #0066cc;
-            --conad: #da291c;
-            --container-max: 980px;
-        }
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Basketly - Risparmia sulla tua spesa con un click</title>
+  <style>
+    /* Reset / base */
+    *,*::before,*::after{box-sizing:border-box}
+    html,body{height:100%;margin:0}
+    body{
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      background:#f3f4f6;
+      color:#1a1a1a;
+      line-height:1.3;
+      min-height:100vh;
+      padding-bottom:120px; /* space for bottom bar */
+    }
 
-        /* Layout container to center content on large screens while keeping a single codebase */
-        .page-container {
-            max-width: var(--container-max);
-            margin: 0 auto;
-            padding-left: 12px;
-            padding-right: 12px;
-        }
+    :root{
+      --primary-color:#27ae60;
+      --card-bg:#ffffff;
+      --text-color:#1a1a1a;
+      --bg-color:#f3f4f6;
+      --container-max:1100px;
+      --gutter:16px;
+      --header-height: auto;
+    }
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--bg-color);
-            margin: 0;
-            color: var(--text-color);
-            padding-bottom: 120px; /* leave room for bottom bar */
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-        }
-        header {
-            background: white;
-            padding: 15px 20px 18px;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-            border-bottom-left-radius: 20px;
-            border-bottom-right-radius: 20px;
-            margin-bottom: 6px;
-            /* keep header full-width visual but center inner content */
-        }
-        .header-inner {
-            max-width: var(--container-max);
-            margin: 0 auto;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-        .header-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2px;
-        }
-        .logo {
-            font-weight: 900;
-            font-size: 1.6rem;
-            color: var(--primary-color);
-            letter-spacing: -1px;
-        }
-        .logo span { color: #2c3e50; }
-        .location-badge {
-            background: #f1f3f4;
-            padding: 8px 12px;
-            border-radius: 12px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            white-space: nowrap;
-        }
-        .geo-row {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-            font-size: 0.85rem;
-            flex-wrap: nowrap;
-        }
-        .geo-row input[type="text"] {
-            padding: 8px 10px;
-            border-radius: 10px;
-            border: 1px solid #ddd;
-            font-size: 0.85rem;
-            flex: 1 1 auto;
-            min-width: 0; /* prevents overflow on small screens */
-            box-sizing: border-box;
-        }
-        .geo-btn {
-            padding: 8px 12px;
-            border-radius: 10px;
-            border: none;
-            background: var(--primary-color);
-            color: white;
-            font-size: 0.8rem;
-            font-weight: 600;
-            cursor: pointer;
-            flex: 0 0 auto;
-        }
-        .geo-status {
-            font-size: 0.8rem;
-            color: #555;
-            white-space: nowrap;
-        }
-        .range-box {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            background: #f1f3f4;
-            padding: 6px 10px;
-            border-radius: 999px;
-        }
-        .range-box input[type="range"] {
-            width: 140px;
-        }
-        .range-value {
-            font-weight: 600;
-            font-size: 0.85rem;
-            min-width: 55px;
-            text-align: right;
-            white-space: nowrap;
-        }
+    /* Centering container used everywhere to keep a single codebase for mobile + desktop */
+    .page-container{
+      max-width:var(--container-max);
+      margin:0 auto;
+      padding-left:var(--gutter);
+      padding-right:var(--gutter);
+    }
 
-        .search-row {
-            display: flex;
-            gap: 10px;
-            margin-top: 6px;
-            align-items: center;
-        }
-        .search-box { flex: 1; min-width: 0; }
-        .search-box input {
-            width: 100%;
-            padding: 14px 15px 14px 45px;
-            border: 2px solid #eee;
-            border-radius: 14px;
-            font-size: 1rem;
-            outline: none;
-            background: #f9f9f9 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23999' viewBox='0 0 16 16'%3E%3Cpath d='M11.742 10.344a6.5 6.5 0 1 [...]
-            box-sizing: border-box;
-            min-width: 0; /* important for mobile */
-        }
-        .filter-box select {
-            padding: 10px 12px;
-            border-radius: 14px;
-            border: 2px solid #eee;
-            background: #f9f9f9;
-            font-size: 0.9rem;
-            outline: none;
-            min-width: 150px;
-        }
+    /* Header */
+    header{
+      position:sticky;
+      top:0;
+      z-index:1200;
+      background:transparent;
+      padding-top:env(safe-area-inset-top);
+    }
+    .header-card{
+      background:#fff;
+      border-radius:14px;
+      padding:14px;
+      margin:10px 0;
+      box-shadow:0 6px 18px rgba(0,0,0,0.06);
+      display:block;
+    }
+    .header-inner{
+      display:flex;
+      gap:12px;
+      align-items:center;
+      justify-content:space-between;
+      flex-wrap:wrap;
+    }
+    .logo{
+      font-weight:900;
+      font-size:1.55rem;
+      color:var(--primary-color);
+      letter-spacing:-1px;
+    }
+    .logo span{color:#2c3e50}
+    .location-badge{
+      background:#f1f3f4;
+      padding:8px 12px;
+      border-radius:12px;
+      font-size:0.9rem;
+      font-weight:600;
+      display:flex;
+      gap:8px;
+      align-items:center;
+      white-space:nowrap;
+    }
 
-        .product-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-            gap: 15px;
-            padding: 20px;
-            max-width: var(--container-max);
-            margin: 0 auto 24px;
-            box-sizing: border-box;
-        }
-        .product-card {
-            background: var(--card-bg);
-            border-radius: 16px;
-            padding: 15px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.03);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-            min-height: 200px;
-        }
-        .product-icon { font-size: 3.5rem; margin-bottom: 10px; }
-        .product-name {
-            font-weight: 700;
-            font-size: 0.9rem;
-            line-height: 1.3;
-            margin-bottom: 4px;
-            height: 2.4em;
-            overflow: hidden;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-        }
-        .product-size { font-size: 0.75rem; color: #888; margin-bottom: 12px; }
-        .controls {
-            display: flex;
-            width: 100%;
-            gap: 8px;
-            margin-top: auto;
-        }
-        .btn-main {
-            flex-grow: 1;
-            background: var(--text-color);
-            color: white;
-            border: none;
-            padding: 10px 0;
-            border-radius: 10px;
-            font-weight: 600;
-            font-size: 0.85rem;
-            cursor: pointer;
-        }
-        .btn-main.added { background: var(--primary-color); }
-        .btn-minus {
-            display: none;
-            width: 38px;
-            background: #fee2e2;
-            color: var(--danger-color);
-            border: none;
-            border-radius: 10px;
-            font-weight: 800;
-            font-size: 1.2rem;
-            cursor: pointer;
-            align-items: center;
-            justify-content: center;
-        }
-        .product-card[data-added="true"] .btn-minus { display: flex; }
+    /* Inputs row */
+    .controls-row{
+      margin-top:12px;
+      display:flex;
+      gap:12px;
+      align-items:center;
+      width:100%;
+      flex-wrap:wrap;
+    }
+    .address-input{
+      flex:1 1 420px;
+      min-width:0;
+    }
+    .address-input input{
+      width:100%;
+      padding:12px 14px;
+      border-radius:12px;
+      border:1px solid #e6e6e6;
+      background:#fafafa;
+      font-size:0.95rem;
+    }
+    .range-box{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      background:#f1f3f4;
+      padding:6px 10px;
+      border-radius:999px;
+      white-space:nowrap;
+      flex:0 0 auto;
+    }
+    .range-box input[type="range"]{width:140px}
+    .range-value{font-weight:600;min-width:55px;text-align:right}
 
-        .bottom-bar {
-            position: fixed;
-            bottom: 0; left: 0; right: 0;
-            background: white;
-            padding: 10px 16px;
-            box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            z-index: 900;
-            border-top: 1px solid #eee;
-            gap: 10px;
-        }
-        .basket-summary {
-            display: flex;
-            flex-direction: column;
-            min-width: 120px;
-        }
-        .basket-count { font-weight: 800; font-size: 1.1rem; }
-        .basket-link { font-size: 0.8rem; text-decoration: underline; cursor: pointer; color: #555; }
+    .geo-btn{
+      background:var(--primary-color);
+      color:#fff;
+      border:none;
+      padding:10px 14px;
+      border-radius:10px;
+      cursor:pointer;
+      font-weight:700;
+      flex:0 0 auto;
+    }
+    .geo-status{font-size:0.85rem;color:#555;white-space:nowrap}
 
-        .bottom-controls {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            flex: 1;
-            justify-content: flex-end;
-        }
-        .pill-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            background: #f1f3f4;
-            border-radius: 999px;
-            padding: 6px 10px;
-            font-size: 0.8rem;
-            border: none;
-            cursor: pointer;
-            color: #333;
-        }
-        .pill-btn select {
-            border: none;
-            background: transparent;
-            font-size: 0.8rem;
-            outline: none;
-            cursor: pointer;
-        }
-        .pill-icon {
-            font-size: 0.9rem;
-        }
-        .toggle-complete {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            background: #f1f3f4;
-            border-radius: 999px;
-            padding: 4px 8px;
-            font-size: 0.75rem;
-        }
-        .toggle-switch {
-            position: relative;
-            width: 30px;
-            height: 16px;
-            background: #d1d5db;
-            border-radius: 999px;
-            cursor: pointer;
-        }
-        .toggle-switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-        .toggle-knob {
-            position: absolute;
-            top: 2px;
-            left: 2px;
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background: white;
-            transition: 0.2s;
-        }
-        .toggle-switch input:checked + .toggle-knob {
-            transform: translateX(12px);
-        }
+    /* Search + filter */
+    .search-row{
+      display:flex;
+      gap:12px;
+      margin-top:12px;
+      align-items:center;
+      width:100%;
+      flex-wrap:wrap;
+    }
+    .search-box{flex:1 1 420px;min-width:0}
+    .search-box input{
+      width:100%;
+      padding:14px 15px;
+      border-radius:12px;
+      border:2px solid #f0f0f0;
+      background:#fafafa;
+      font-size:1rem;
+    }
+    .filter-box{flex:0 0 180px}
+    .filter-box select{
+      width:100%;
+      padding:10px;
+      border-radius:12px;
+      border:1px solid #e6e6e6;
+      background:#fff;
+      font-size:0.95rem;
+    }
 
-        .compare-btn {
-            background: var(--primary-color);
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 24px;
-            font-weight: 700;
-            font-size: 0.95rem;
-            box-shadow: 0 4px 15px rgba(39, 174, 96, 0.4);
-            cursor: pointer;
-            white-space: nowrap;
-        }
+    /* Product grid */
+    .product-grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fill, minmax(180px, 1fr));
+      gap:18px;
+      padding:22px 0 40px;
+    }
+    .product-card{
+      background:var(--card-bg);
+      border-radius:14px;
+      padding:16px;
+      box-shadow:0 6px 18px rgba(0,0,0,0.04);
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      text-align:center;
+      min-height:220px;
+    }
+    .product-icon{font-size:3.6rem;margin-bottom:8px}
+    .product-name{font-weight:700;font-size:1rem;margin-bottom:6px;line-height:1.2}
+    .product-size{font-size:0.82rem;color:#888;margin-bottom:12px}
+    .controls{display:flex;width:100%;gap:8px;margin-top:auto}
+    .btn-main{
+      flex:1;background:#111;color:#fff;border-radius:10px;padding:10px 8px;border:none;cursor:pointer;font-weight:700
+    }
+    .btn-minus{display:none}
+    .product-card[data-added="true"] .btn-minus{display:block}
 
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.6);
-            backdrop-filter: blur(4px);
-            z-index: 2000;
-        }
-        .modal-card {
-            display: block;
-            position: absolute;
-            bottom: 0;
-            width: 100%;
-            max-height: 85vh;
-            background: #f9fafb;
-            border-radius: 24px 24px 0 0;
-            overflow-y: auto;
-            animation: slideUp 0.3s ease-out;
-            box-sizing: border-box;
-        }
-        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-        .modal-header {
-            position: sticky; top: 0; background: white; padding: 20px;
-            display: flex; justify-content: space-between; align-items: center;
-            border-bottom: 1px solid #eee; z-index: 10;
-        }
-        .close-icon { font-size: 1.5rem; cursor: pointer; background:none; border:none; padding: 5px; }
-        .basket-list { padding: 20px; }
-        .basket-item {
-            background: white; padding: 15px; border-radius: 12px;
-            margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-        }
-        .b-icon { font-size: 2rem; margin-right: 15px; width: 40px; text-align: center; }
-        .b-qty-control { display: flex; align-items: center; gap: 8px; background: #f3f4f6; padding: 5px; border-radius: 8px; }
-        .b-btn { width: 28px; height: 28px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-        .b-minus { background: white; color: var(--danger-color); }
-        .b-plus { background: white; color: var(--primary-color); }
+    /* Bottom bar */
+    .bottom-bar{
+      position:fixed;
+      left:0;right:0;bottom:0;
+      z-index:1300;
+      background:rgba(255,255,255,0.98);
+      box-shadow:0 -8px 30px rgba(0,0,0,0.08);
+      padding:12px 0;
+    }
+    .bottom-inner{
+      display:flex;
+      gap:12px;
+      align-items:center;
+      justify-content:space-between;
+      max-width:var(--container-max);
+      margin:0 auto;
+      padding:0 var(--gutter);
+    }
+    .basket-summary{display:flex;flex-direction:column;min-width:160px}
+    .basket-count{font-weight:800;font-size:1.05rem}
+    .basket-link{font-size:0.85rem;color:#555;text-decoration:underline;cursor:pointer}
 
-        .result-card {
-            background: white; border-radius: 16px; padding: 20px; margin: 20px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05); position: relative; border: 2px solid transparent;
-        }
-        .result-card.best { border-color: var(--primary-color); background: #f0fdf4; }
-        .best-badge {
-            position: absolute; top: -10px; right: 20px; background: var(--primary-color);
-            color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 800;
-        }
-        .store-row { display: flex; align-items: center; gap: 15px; margin-bottom: 15px; border-bottom: 1px dashed #eee; padding-bottom: 15px; }
-        .store-avatar {
-            width: 50px; height: 50px; border-radius: 10px;
-            display: flex; align-items: center; justify-content: center;
-            color: white; font-weight: 900; font-size: 1.2rem;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        .s-esselunga { background-color: var(--esselunga); color: #ffcc00; position:relative; }
-        .s-esselunga:after { content:"S"; position:absolute; top: -5px; font-size: 1.5rem; }
-        .s-lidl { background-color: var(--lidl); color: #FFF000; border-bottom: 4px solid #E60A14; }
-        .s-carrefour { background-color: var(--carrefour); }
-        .s-tigros { background-color: var(--tigros); border-bottom: 4px solid #ffd700; }
-        .s-conad { background-color: white; border: 2px solid var(--conad); color: var(--conad); }
-        .total { font-size: 1.5rem; font-weight: 800; text-align: right; margin-top: 10px; color: var(--text-color); }
+    .bottom-controls{display:flex;gap:10px;align-items:center;flex:1;justify-content:flex-end}
+    .pill-btn{display:inline-flex;align-items:center;gap:8px;background:#f1f3f4;padding:8px 12px;border-radius:999px;border:none}
 
-        .toggle-btn {
-            width: 100%;
-            background: none;
-            border: none;
-            color: #666;
-            font-size: 0.85rem;
-            padding: 10px;
-            margin-top: 10px;
-            border-top: 1px solid #eee;
-            cursor: pointer;
-            text-align: center;
-            font-weight: 600;
-        }
-        .breakdown-list {
-            background: #f9f9f9;
-            margin-top: 10px;
-            padding: 10px;
-            border-radius: 8px;
-            display: none;
-        }
-        .breakdown-row {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.85rem;
-            padding: 4px 0;
-            border-bottom: 1px dashed #eee;
-        }
-        .breakdown-row:last-child { border-bottom: none; }
-        .bd-price { font-weight: 600; color: #333; }
+    .compare-btn{background:var(--primary-color);color:#fff;border:none;padding:10px 14px;border-radius:999px;font-weight:800;cursor:pointer}
 
-        /* New styles for timestamp & source metadata */
-        .price-meta {
-            font-size: 0.78rem;
-            color: #555;
-            margin-top: 4px;
-        }
-        .store-meta {
-            font-size: 0.82rem;
-            color: #555;
-            margin-top: 8px;
-        }
+    /* Modals/results - make them centered and constrained */
+    .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:1400;align-items:flex-end}
+    .modal-card{
+      width:100%;
+      max-width:var(--container-max);
+      margin:0 auto;
+      background:#f9fafb;
+      border-radius:18px 18px 0 0;
+      max-height:88vh;
+      overflow:auto;
+      box-shadow:0 -8px 40px rgba(0,0,0,0.12);
+    }
+    .modal-header{position:sticky;top:0;background:#fff;padding:16px;border-bottom:1px solid #eee;display:flex;align-items:center;justify-content:space-between;z-index:2}
 
-        /* ------------------ Responsive adjustments ------------------ */
-        /* Mobile-first tweaks */
-        @media (max-width: 640px) {
-            header {
-                padding: 12px 12px 12px;
-                border-bottom-left-radius: 0;
-                border-bottom-right-radius: 0; /* avoid big rounded shape overlapping content */
-                box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-            }
-            .header-inner { padding: 0; gap: 6px; }
-            .header-top { align-items: center; gap: 8px; }
-            .geo-row {
-                flex-direction: column;
-                align-items: stretch;
-                gap: 8px;
-            }
-            .range-box { width: 100%; justify-content: space-between; }
-            .range-box input[type="range"] { width: 100%; max-width: 220px; }
-            .search-row {
-                display: grid;
-                grid-template-columns: 1fr auto;
-                gap: 8px;
-                align-items: center;
-            }
-            .filter-box select { min-width: 120px; }
-            .product-grid {
-                grid-template-columns: repeat(2, 1fr); /* more compact for phones */
-                gap: 12px;
-                padding: 12px;
-            }
-            .product-card { min-height: 210px; padding: 14px; }
-            .bottom-bar {
-                padding: 10px 12px;
-                gap: 8px;
-                align-items: center;
-                /* respect iPhone safe area */
-                padding-bottom: calc(12px + env(safe-area-inset-bottom));
-            }
-            .result-card { margin: 14px 10px; padding: 14px; }
-            .modal-card { max-height: 88vh; border-radius: 18px 18px 0 0; }
-            .modal-header { padding: 14px; }
-            /* ensure big clickable elements don't overflow */
-            .btn-main { padding: 10px 6px; font-size: 0.9rem; }
-        }
+    /* Results card layout */
+    .result-card{background:#fff;border-radius:12px;padding:16px;margin:16px;border:1px solid transparent;box-shadow:0 6px 20px rgba(0,0,0,0.04)}
+    .result-card.best{border-color:var(--primary-color);background:#f0fdf4}
+    .store-row{display:flex;gap:12px;align-items:center;margin-bottom:8px}
+    .store-avatar{width:50px;height:50px;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900}
 
-        /* Larger screens */
-        @media (min-width: 641px) {
-            header { border-bottom-left-radius: 20px; border-bottom-right-radius: 20px; padding: 18px 24px 22px; }
-            .header-inner { display:block; }
-            .geo-row { flex-direction: row; gap: 12px; align-items: center; }
-            .search-row { display:flex; }
-            .product-grid { padding: 24px; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 18px; }
-        }
+    /* breakdown */
+    .breakdown-list{background:#f9f9f9;padding:10px;border-radius:8px;margin-top:8px;display:none}
+    .breakdown-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dashed #eee}
+    .breakdown-row:last-child{border-bottom:none}
 
-        /* Medium screens: reasonable adjustments */
-        @media (min-width: 980px) {
-            body { padding-bottom: 120px; }
-            .product-grid { padding: 28px; }
-        }
+    /* Metadata */
+    .price-meta{font-size:0.78rem;color:#555;margin-top:4px}
+    .store-meta{font-size:0.82rem;color:#555;margin-top:8px}
 
-        /* Utility: prevent any element from pushing outside the viewport on small screens */
-        * { -webkit-tap-highlight-color: transparent; }
-    </style>
+    /* Responsive: mobile-first */
+    @media (max-width:640px){
+      .header-card{margin:8px 8px 6px;border-radius:12px;padding:12px}
+      .header-inner{flex-direction:row;align-items:center;gap:8px}
+      .controls-row{flex-direction:column;align-items:stretch}
+      .address-input{flex:1}
+      .range-box{justify-content:space-between;width:100%}
+      .search-row{display:flex;flex-direction:column;gap:8px}
+      .filter-box{width:100%}
+      .product-grid{grid-template-columns:repeat(2,1fr);gap:12px;padding:14px 0 28px}
+      .product-card{min-height:200px;padding:12px}
+      .bottom-inner{flex-direction:row;align-items:center;gap:8px}
+      .basket-summary{min-width:120px}
+      .modal{align-items:flex-end}
+      .modal-card{border-radius:14px}
+    }
+
+    /* Larger screens improvements */
+    @media (min-width:641px){
+      .header-inner{flex-wrap:nowrap}
+      .controls-row{flex-wrap:nowrap}
+      .search-row{flex-wrap:nowrap}
+      .product-grid{grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:18px;padding:28px 0 40px}
+      .header-card{margin:18px 0;border-radius:16px;padding:18px}
+    }
+
+    /* very large screens */
+    @media (min-width:1200px){
+      .product-grid{grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:20px}
+    }
+
+    /* small visual helpers */
+    .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+  </style>
 </head>
 <body>
 
-<header>
-    <div class="header-inner page-container">
-        <div class="header-top">
-            <div class="logo">Basketly<span>.</span></div>
-            <div class="location-badge">
-                📍
-                <span id="geoLabel">Posizione non impostata</span>
-            </div>
+  <header>
+    <div class="page-container">
+      <div class="header-card">
+        <div class="header-inner">
+          <div class="logo">Basketly<span>.</span></div>
+          <div class="location-badge">📍 <span id="geoLabel">Posizione non impostata</span></div>
         </div>
 
-        <div class="geo-row">
-            <input type="text" id="addressInput" placeholder="Inserisci indirizzo (es. Via Candiani 131, Milano)" size="35">
-            <div class="range-box">
-                <span style="font-size:0.8rem;">Raggio</span>
-                <input type="range" id="radiusSlider" min="1" max="10" step="0.5" value="3"
-                       oninput="updateRadiusLabel(this.value)">
-                <span class="range-value" id="radiusLabel">3.0 km</span>
-            </div>
-            <button class="geo-btn" onclick="setUserLocation()">Imposta posizione</button>
-            <span class="geo-status" id="geoStatus"></span>
+        <div class="controls-row" style="margin-top:10px">
+          <div class="address-input">
+            <input id="addressInput" type="text" placeholder="Inserisci indirizzo (es. Via Candiani 131, Milano)">
+          </div>
+
+          <div class="range-box" aria-hidden="true">
+            <span style="font-size:0.85rem">Raggio</span>
+            <input id="radiusSlider" type="range" min="1" max="10" step="0.5" value="3" oninput="updateRadiusLabel(this.value)">
+            <span class="range-value" id="radiusLabel">3.0 km</span>
+          </div>
+
+          <button class="geo-btn" onclick="setUserLocation()">Imposta posizione</button>
         </div>
 
         <div class="search-row">
-            <div class="search-box">
-                <input type="text" id="searchInput" placeholder="Cerca prodotti...">
-            </div>
-            <div class="filter-box">
-                <select id="typeFilter">
-                    <option value="all">Tutti i prodotti</option>
-                    <option value="perishable">Prodotti deperibili (freschi)</option>
-                    <option value="household">Prodotti casa & cura</option>
-                    <option value="longlife">Prodotti lunga conservazione</option>
-                </select>
-            </div>
-        </div>
-    </div>
-</header>
-
-<main class="page-container">
-    <div class="product-grid" id="productGrid"></div>
-</main>
-
-<div class="bottom-bar">
-    <div class="basket-summary">
-        <span class="basket-count" id="barCount">0 Articoli</span>
-        <span class="basket-link" onclick="toggleModal('basketModal')">Apri/Modifica Carrello</span>
-    </div>
-    <div class="bottom-controls">
-        <button class="pill-btn" type="button">
-            <span class="pill-icon">↕️</span>
-            <span>Ordina</span>
-            <select id="sortMode">
-                <option value="price">Prezzo</option>
-                <option value="distance">Distanza</option>
-                <option value="mixed">Mix € / km</option>
+          <div class="search-box">
+            <input id="searchInput" type="text" placeholder="Cerca prodotti...">
+          </div>
+          <div class="filter-box">
+            <select id="typeFilter">
+              <option value="all">Tutti i prodotti</option>
+              <option value="perishable">Prodotti deperibili (freschi)</option>
+              <option value="household">Prodotti casa & cura</option>
+              <option value="longlife">Prodotti lunga conservazione</option>
             </select>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </header>
+
+  <main class="page-container" style="padding-bottom:20px;">
+    <div id="productGrid" class="product-grid" aria-live="polite"></div>
+  </main>
+
+  <div class="bottom-bar">
+    <div class="bottom-inner page-container">
+      <div class="basket-summary">
+        <div class="basket-count" id="barCount">0 Articoli</div>
+        <div class="basket-link" onclick="toggleModal('basketModal')">Apri/Modifica Carrello</div>
+      </div>
+
+      <div class="bottom-controls" role="region" aria-label="Controlli bottom">
+        <button class="pill-btn" type="button">
+          <span style="font-size:1.05rem">↕️</span>
+          <span>Ordina</span>
+          <select id="sortMode" style="border:none;background:transparent;margin-left:6px">
+            <option value="price">Prezzo</option>
+            <option value="distance">Distanza</option>
+            <option value="mixed">Mix € / km</option>
+          </select>
         </button>
-        <label class="toggle-complete">
-            <span style="font-size:0.75rem;">Solo completi</span>
-            <div class="toggle-switch">
-                <input type="checkbox" id="onlyComplete">
-                <div class="toggle-knob"></div>
-            </div>
+
+        <label class="toggle-complete" style="display:flex;align-items:center;">
+          <span style="margin-right:8px;font-size:0.85rem">Solo completi</span>
+          <div class="toggle-switch">
+            <input id="onlyComplete" type="checkbox">
+            <div class="toggle-knob"></div>
+          </div>
         </label>
+
         <button class="compare-btn" onclick="runComparison()">Confronta ⚡</button>
+      </div>
     </div>
-</div>
+  </div>
 
-<div class="modal" id="basketModal">
-    <div class="modal-card">
-        <div class="modal-header">
-            <h2 style="margin:0">Il tuo Carrello</h2>
-            <button class="close-icon" onclick="toggleModal('basketModal')">✕</button>
+  <div id="basketModal" class="modal">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="carrelloTitle">
+      <div class="modal-header">
+        <h2 id="carrelloTitle" style="margin:0">Il tuo Carrello</h2>
+        <button class="close-icon" onclick="toggleModal('basketModal')">✕</button>
+      </div>
+      <div class="basket-list" id="basketListContainer" style="padding:16px"></div>
+    </div>
+  </div>
+
+  <div id="resultsModal" class="modal">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="resultsTitle">
+      <div class="modal-header">
+        <div style="flex:1;min-width:0">
+          <h2 id="resultsTitle" style="margin:0">Migliori Prezzi</h2>
+          <div id="savingsSummary" style="font-size:0.85rem;color:#555;margin-top:6px"></div>
         </div>
-        <div class="basket-list" id="basketListContainer"></div>
+        <button class="close-icon" onclick="toggleModal('resultsModal')">✕</button>
+      </div>
+      <div id="resultsContainer" style="padding:12px 16px 36px"></div>
     </div>
-</div>
+  </div>
 
-<div class="modal" id="resultsModal">
-    <div class="modal-card">
-        <div class="modal-header">
-            <div style="flex:1; min-width:0;">
-                <h2 style="margin:0">Migliori Prezzi</h2>
-                <div id="savingsSummary" style="font-size:0.8rem; color:#555; margin-top:4px;"></div>
-            </div>
-            <button class="close-icon" onclick="toggleModal('resultsModal')">✕</button>
-        </div>
-        <div id="resultsContainer" style="padding-bottom: 40px;"></div>
-    </div>
-</div>
+  <script>
+    /* Data (same as repo) */
+    const products = [
+      { id: 1, category: "Ortofrutta", type: "perishable", name: "Mele Golden", size: "1kg", icon: "🍏",
+        prices: { esselunga: 2.09, lidl: 1.79, carrefour: 2.19, tigros: 2.15, conad: 2.05 } },
+      { id: 2, category: "Ortofrutta", type: "perishable", name: "Banane", size: "1kg", icon: "🍌",
+        prices: { esselunga: 1.59, lidl: 1.39, carrefour: 1.69, tigros: 1.65, conad: 1.58 } },
+      { id: 3, category: "Ortofrutta", type: "perishable", name: "Insalata Mista in Busta", size: "200g", icon: "🥬",
+        prices: { esselunga: 1.09, lidl: 0.99, carrefour: 1.19, tigros: 1.05, conad: 1.12 } },
 
-<script>
-   const products = [
-    // (products array same as before; truncated here for brevity in this view)
-    { id: 1, category: "Ortofrutta", type: "perishable", name: "Mele Golden", size: "1kg", icon: "🍏",
-      prices: { esselunga: 2.09, lidl: 1.79, carrefour: 2.19, tigros: 2.15, conad: 2.05 } },
-    /* ... (keep the full list exactly as in your repo) ... */
-];
+      { id: 10, category: "Carne", type: "perishable", name: "Petto di Pollo a Fette", size: "500g", icon: "🍗",
+        prices: { esselunga: 4.99, lidl: 4.89, carrefour: 5.29, tigros: 4.95, conad: 5.05 } },
+      { id: 11, category: "Carne", type: "perishable", name: "Macinato di Manzo", size: "500g", icon: "🥩",
+        prices: { esselunga: 4.79, lidl: 4.69, carrefour: 4.99, tigros: 4.75, conad: 4.90 } },
+      { id: 12, category: "Carne", type: "perishable", name: "Fettine di Vitello", size: "400g", icon: "🥩",
+        prices: { esselunga: 7.39, lidl: 7.49, carrefour: 7.69, tigros: 7.25, conad: 7.50 } },
+
+      { id: 20, category: "Pesce", type: "perishable", name: "Salmone Fresco a Tranci", size: "300g", icon: "🐟",
+        prices: { esselunga: 7.99, lidl: 7.89, carrefour: 7.79, tigros: 7.85, conad: 8.10 } },
+      { id: 21, category: "Pesce", type: "perishable", name: "Filetti di Merluzzo Freschi", size: "400g", icon: "🐟",
+        prices: { esselunga: 6.39, lidl: 6.29, carrefour: 6.19, tigros: 6.25, conad: 6.35 } },
+      { id: 22, category: "Pesce", type: "perishable", name: "Gamberi Sgusciati", size: "250g", icon: "🦐",
+        prices: { esselunga: 5.99, lidl: 5.89, carrefour: 6.09, tigros: 5.95, conad: 6.05 } },
+
+      { id: 30, category: "Salumi/Formaggi", type: "perishable", name: "Prosciutto Cotto Rovagnati", size: "120g", icon: "🥓",
+        prices: { esselunga: 2.29, lidl: 2.09, carrefour: 2.39, tigros: 2.25, conad: 2.30 } },
+      { id: 31, category: "Salumi/Formaggi", type: "perishable", name: "Prosciutto Crudo di Parma", size: "100g", icon: "🥓",
+        prices: { esselunga: 3.09, lidl: 2.99, carrefour: 3.19, tigros: 3.05, conad: 3.10 } },
+      { id: 32, category: "Salumi/Formaggi", type: "perishable", name: "Mozzarella Galbani Santa Lucia", size: "3x100g", icon: "🧀",
+        prices: { esselunga: 2.89, lidl: 2.79, carrefour: 2.99, tigros: 2.90, conad: 2.95 } },
+
+      { id: 40, category: "Gastronomia", type: "perishable", name: "Lasagne Pronte al Ragù", size: "1 porzione", icon: "🍲",
+        prices: { esselunga: 4.89, lidl: 4.19, carrefour: 5.09, tigros: 4.95, conad: 5.00 } },
+      { id: 41, category: "Gastronomia", type: "perishable", name: "Insalata di Riso Pronta", size: "300g", icon: "🥗",
+        prices: { esselunga: 3.39, lidl: 2.99, carrefour: 3.69, tigros: 3.45, conad: 3.50 } },
+      { id: 42, category: "Gastronomia", type: "perishable", name: "Pollo allo Spiedo", size: "1 pezzo", icon: "🍗",
+        prices: { esselunga: 7.99, lidl: 7.49, carrefour: 8.29, tigros: 7.90, conad: 8.10 } },
+
+      { id: 50, category: "Latticini", type: "perishable", name: "Latte Parzialmente Scremato Granarolo", size: "1L", icon: "🥛",
+        prices: { esselunga: 1.39, lidl: 1.29, carrefour: 1.45, tigros: 1.35, conad: 1.38 } },
+      { id: 51, category: "Latticini", type: "perishable", name: "Yogurt Bianco Müller", size: "2x125g", icon: "🥣",
+        prices: { esselunga: 1.09, lidl: 0.99, carrefour: 1.19, tigros: 1.05, conad: 1.08 } },
+      { id: 52, category: "Latticini", type: "perishable", name: "Burro Galbani Santa Lucia", size: "250g", icon: "🧈",
+        prices: { esselunga: 2.39, lidl: 2.29, carrefour: 2.59, tigros: 2.45, conad: 2.48 } },
+
+      { id: 60, category: "Panetteria", type: "perishable", name: "Pane Casereccio", size: "500g", icon: "🍞",
+        prices: { esselunga: 2.09, lidl: 1.69, carrefour: 2.29, tigros: 1.99, conad: 2.05 } },
+      { id: 61, category: "Panetteria", type: "perishable", name: "Baguette", size: "300g", icon: "🥖",
+        prices: { esselunga: 1.39, lidl: 1.19, carrefour: 1.49, tigros: 1.29, conad: 1.35 } },
+      { id: 62, category: "Panetteria", type: "perishable", name: "Brioche Vuota", size: "1 pezzo", icon: "🥐",
+        prices: { esselunga: 1.05, lidl: 0.89, carrefour: 1.15, tigros: 0.99, conad: 1.10 } },
+
+      { id: 70, category: "Surgelati", type: "longlife", name: "Buitoni Pizza Margherita Surgelata", size: "350g", icon: "🍕",
+        prices: { esselunga: 2.59, lidl: 2.19, carrefour: 2.49, tigros: 2.45, conad: 2.55 } },
+      { id: 71, category: "Surgelati", type: "longlife", name: "Verdure Miste Surgelate", size: "600g", icon: "🥦",
+        prices: { esselunga: 2.39, lidl: 1.99, carrefour: 2.29, tigros: 2.25, conad: 2.30 } },
+      { id: 72, category: "Surgelati", type: "longlife", name: "Gelato Alla Vaniglia", size: "500ml", icon: "🍨",
+        prices: { esselunga: 3.39, lidl: 2.99, carrefour: 3.29, tigros: 3.20, conad: 3.30 } },
+
+      { id: 80, category: "Dispensa", type: "longlife", name: "Barilla Spaghetti N.5", size: "500g", icon: "🍝",
+        prices: { esselunga: 1.19, lidl: 1.09, carrefour: 1.25, tigros: 1.22, conad: 1.20 } },
+      { id: 81, category: "Dispensa", type: "longlife", name: "De Cecco Spaghetti", size: "500g", icon: "🍝",
+        prices: { esselunga: 1.49, lidl: 1.55, carrefour: 1.39, tigros: 1.48, conad: 1.52 } },
+      { id: 82, category: "Dispensa", type: "longlife", name: "Rummo Spaghetti N.3", size: "500g", icon: "🍝",
+        prices: { esselunga: 1.69, lidl: 1.75, carrefour: 1.59, tigros: 1.70, conad: 1.72 } },
+      { id: 83, category: "Dispensa", type: "longlife", name: "Barilla Penne Rigate", size: "500g", icon: "🍝",
+        prices: { esselunga: 1.19, lidl: 1.09, carrefour: 1.25, tigros: 1.22, conad: 1.20 } },
+      { id: 84, category: "Dispensa", type: "longlife", name: "De Cecco Penne Rigate", size: "500g", icon: "🍝",
+        prices: { esselunga: 1.49, lidl: 1.55, carrefour: 1.39, tigros: 1.48, conad: 1.52 } },
+      { id: 85, category: "Dispensa", type: "longlife", name: "La Molisana Penne Rigate", size: "500g", icon: "🍝",
+        prices: { esselunga: 1.39, lidl: 1.35, carrefour: 1.45, tigros: 1.38, conad: 1.40 } },
+      { id: 90, category: "Dispensa", type: "longlife", name: "Riso Arborio Scotti", size: "1kg", icon: "🍚",
+        prices: { esselunga: 2.69, lidl: 2.79, carrefour: 2.59, tigros: 2.65, conad: 2.70 } },
+      { id: 91, category: "Dispensa", type: "longlife", name: "Cirio Passata di Pomodoro", size: "700g", icon: "🍅",
+        prices: { esselunga: 1.59, lidl: 1.49, carrefour: 1.55, tigros: 1.52, conad: 1.58 } },
+      { id: 92, category: "Dispensa", type: "longlife", name: "Mutti Passata di Pomodoro", size: "700g", icon: "🍅",
+        prices: { esselunga: 1.69, lidl: 1.79, carrefour: 1.65, tigros: 1.70, conad: 1.72 } },
+      { id: 93, category: "Dispensa", type: "longlife", name: "Rio Mare Tonno all'Olio di Oliva 3x80g", size: "3x80g", icon: "🐟",
+        prices: { esselunga: 4.39, lidl: 4.29, carrefour: 4.35, tigros: 4.30, conad: 4.38 } },
+      { id: 94, category: "Dispensa", type: "longlife", name: "Manzotin Carne in Gelatina", size: "140g", icon: "🥫",
+        prices: { esselunga: 2.19, lidl: 2.09, carrefour: 2.25, tigros: 2.20, conad: 2.22 } },
+      { id: 95, category: "Dispensa", type: "longlife", name: "Barilla Sugo Pronto all'Arrabbiata", size: "400g", icon: "🍅",
+        prices: { esselunga: 2.19, lidl: 2.09, carrefour: 2.29, tigros: 2.22, conad: 2.25 } },
+      { id: 96, category: "Dispensa", type: "longlife", name: "Borlotti in Scatola Valfrutta", size: "400g", icon: "🫘",
+        prices: { esselunga: 1.05, lidl: 0.99, carrefour: 1.09, tigros: 1.02, conad: 1.08 } },
+      { id: 97, category: "Dispensa", type: "longlife", name: "Cracker Salati Saiwa", size: "500g", icon: "🧂",
+        prices: { esselunga: 2.19, lidl: 1.99, carrefour: 2.29, tigros: 2.15, conad: 2.20 } },
+      { id: 98, category: "Snack/Dolci", type: "longlife", name: "Mulino Bianco Pan di Stelle", size: "350g", icon: "⭐",
+        prices: { esselunga: 2.99, lidl: 2.89, carrefour: 2.95, tigros: 2.92, conad: 2.98 } },
+      { id: 99, category: "Dispensa", type: "longlife", name: "Pomodori Pelati Mutti", size: "400g", icon: "🧺",
+        prices: { esselunga: 1.39, lidl: 1.29, carrefour: 1.35, tigros: 1.32, conad: 1.38 } },
+
+      { id: 100, category: "Snack/Dolci", type: "longlife", name: "San Carlo Patatine Classiche", size: "180g", icon: "🥔",
+        prices: { esselunga: 1.79, lidl: 1.69, carrefour: 1.75, tigros: 1.72, conad: 1.78 } },
+      { id: 101, category: "Snack/Dolci", type: "longlife", name: "Pavesi Gocciole", size: "500g", icon: "🍪",
+        prices: { esselunga: 2.69, lidl: 2.59, carrefour: 2.65, tigros: 2.60, conad: 2.68 } },
+      { id: 102, category: "Snack/Dolci", type: "longlife", name: "Tavoletta di Cioccolato Novi Fondente", size: "100g", icon: "🍫",
+        prices: { esselunga: 1.69, lidl: 1.59, carrefour: 1.65, tigros: 1.62, conad: 1.68 } },
+      { id: 110, category: "Colazione", type: "longlife", name: "Kellogg's Corn Flakes", size: "375g", icon: "🥣",
+        prices: { esselunga: 2.39, lidl: 2.19, carrefour: 2.29, tigros: 2.25, conad: 2.35 } },
+      { id: 111, category: "Colazione", type: "longlife", name: "Mulino Bianco Fette Biscottate Integrali", size: "320g", icon: "🍞",
+        prices: { esselunga: 1.99, lidl: 1.79, carrefour: 1.89, tigros: 1.85, conad: 1.95 } },
+      { id: 112, category: "Colazione", type: "longlife", name: "Crema Spalmabile alla Nocciola Nutella", size: "450g", icon: "🍫",
+        prices: { esselunga: 4.29, lidl: 4.39, carrefour: 4.19, tigros: 4.25, conad: 4.30 } },
+
+      { id: 120, category: "Bevande", type: "longlife", name: "Acqua Naturale 1,5L", size: "1.5L", icon: "💧",
+        prices: { esselunga: 0.39, lidl: 0.25, carrefour: 0.45, tigros: 0.40, conad: 0.42 } },
+      { id: 121, category: "Bevande", type: "longlife", name: "Bibita Tipo Cola", size: "1.5L", icon: "🥤",
+        prices: { esselunga: 1.39, lidl: 0.99, carrefour: 1.49, tigros: 1.29, conad: 1.35 } },
+      { id: 122, category: "Bevande", type: "longlife", name: "Succo di Arancia 100%", size: "1L", icon: "🧃",
+        prices: { esselunga: 1.79, lidl: 1.29, carrefour: 1.89, tigros: 1.80, conad: 1.82 } },
+      { id: 123, category: "Bevande", type: "longlife", name: "Tè Freddo Pesca Lipton 1,5L", size: "1.5L", icon: "🧋",
+        prices: { esselunga: 1.79, lidl: 1.49, carrefour: 1.89, tigros: 1.75, conad: 1.80 },
+        availability: { esselunga: true, lidl: true, carrefour: true, tigros: true, conad: false } },
+
+      { id: 130, category: "Cura Casa", type: "household", name: "Nelsen Detersivo Piatti", size: "900ml", icon: "🧼",
+        prices: { esselunga: 2.19, lidl: 1.99, carrefour: 2.29, tigros: 2.15, conad: 2.20 } },
+      { id: 131, category: "Cura Casa", type: "household", name: "Dash Detersivo Lavatrice Liquido", size: "25 lavaggi", icon: "🧴",
+        prices: { esselunga: 6.49, lidl: 6.59, carrefour: 6.29, tigros: 6.40, conad: 6.45 } },
+      { id: 132, category: "Cura Casa", type: "household", name: "Scottex Carta Assorbente da Cucina", size: "2 rotoli", icon: "📜",
+        prices: { esselunga: 2.69, lidl: 2.49, carrefour: 2.59, tigros: 2.55, conad: 2.60 } },
+
+      { id: 140, category: "Cura Persona", type: "household", name: "Head & Shoulders Shampoo", size: "250ml", icon: "🧴",
+        prices: { esselunga: 3.49, lidl: 3.59, carrefour: 3.39, tigros: 3.45, conad: 3.50 } },
+      { id: 141, category: "Cura Persona", type: "household", name: "Mentadent Dentifricio", size: "75ml", icon: "🪥",
+        prices: { esselunga: 2.09, lidl: 1.99, carrefour: 2.05, tigros: 2.00, conad: 2.08 } },
+      { id: 142, category: "Cura Persona", type: "household", name: "Felce Azzurra Bagnoschiuma", size: "650ml", icon: "🛁",
+        prices: { esselunga: 2.99, lidl: 2.79, carrefour: 2.89, tigros: 2.85, conad: 2.95 } },
+
+      { id: 150, category: "Animali", type: "household", name: "Monge Crocchette per Cani", size: "1.5kg", icon: "🐶",
+        prices: { esselunga: 5.29, lidl: 5.09, carrefour: 5.19, tigros: 5.15, conad: 5.25 },
+        availability: { esselunga: true, lidl: true, carrefour: true, tigros: true, conad: true } },
+      { id: 151, category: "Animali", type: "household", name: "Monge Crocchette per Gatti", size: "1.5kg", icon: "🐱",
+        prices: { esselunga: 5.49, lidl: 5.59, carrefour: 5.39, tigros: 5.45, conad: 5.50 },
+        availability: { esselunga: true, lidl: true, carrefour: true, tigros: false, conad: true } },
+      { id: 152, category: "Animali", type: "household", name: "Lettiera per Gatti Agglomerante", size: "5kg", icon: "🧺",
+        prices: { esselunga: 4.99, lidl: 4.79, carrefour: 4.89, tigros: 4.85, conad: 4.95 },
+        availability: { esselunga: true, lidl: false, carrefour: true, tigros: true, conad: true } },
+
+      { id: 160, category: "Casalinghi", type: "household", name: "Pellicola Trasparente", size: "30m", icon: "📦",
+        prices: { esselunga: 1.89, lidl: 1.69, carrefour: 1.79, tigros: 1.75, conad: 1.82 } },
+      { id: 161, category: "Casalinghi", type: "household", name: "Sacchetti Immondizia 50L", size: "20 pezzi", icon: "🗑️",
+        prices: { esselunga: 2.19, lidl: 2.09, carrefour: 2.15, tigros: 2.12, conad: 2.18 },
+        availability: { esselunga: true, lidl: true, carrefour: false, tigros: true, conad: true } },
+      { id: 162, category: "Casalinghi", type: "household", name: "Batterie AAA Alcaline (4 pezzi)", size: "4pz", icon: "🔋",
+        prices: { esselunga: 3.49, lidl: 3.39, carrefour: 3.29, tigros: 3.35, conad: 3.40 } }
+    ];
 
     const stores = {
-        esselunga: { name: "Esselunga", class: "s-esselunga", short: "E" },
-        lidl: { name: "Lidl", class: "s-lidl", short: "L" },
-        carrefour: { name: "Carrefour", class: "s-carrefour", short: "C" },
-        tigros: { name: "Tigros", class: "s-tigros", short: "T" },
-        conad: { name: "Conad", class: "s-conad", short: "C" }
+      esselunga: { name: "Esselunga", class: "s-esselunga", short: "E" },
+      lidl: { name: "Lidl", class: "s-lidl", short: "L" },
+      carrefour: { name: "Carrefour", class: "s-carrefour", short: "C" },
+      tigros: { name: "Tigros", class: "s-tigros", short: "T" },
+      conad: { name: "Conad", class: "s-conad", short: "C" }
     };
 
     const storeLocations = {
-        esselunga: { lat: 45.485, lon: 9.228 },
-        lidl:      { lat: 45.493, lon: 9.210 },
-        carrefour: { lat: 45.462, lon: 9.196 },
-        tigros:    { lat: 45.505, lon: 9.160 },
-        conad:     { lat: 45.474, lon: 9.214 }
+      esselunga: { lat: 45.485, lon: 9.228 },
+      lidl: { lat: 45.493, lon: 9.210 },
+      carrefour: { lat: 45.462, lon: 9.196 },
+      tigros: { lat: 45.505, lon: 9.160 },
+      conad: { lat: 45.474, lon: 9.214 }
     };
 
-    // ===== Helper functions for fake timestamps & sources (coherent but fake) =====
-    function formatTimestamp(d) {
-      const dd = String(d.getDate()).padStart(2,'0');
-      const mm = String(d.getMonth()+1).padStart(2,'0');
-      const hh = String(d.getHours()).padStart(2,'0');
-      const min = String(d.getMinutes()).padStart(2,'0');
+    // Fake timestamps & sources helper (coherent but demo)
+    function formatTimestamp(d){
+      const dd=String(d.getDate()).padStart(2,'0');
+      const mm=String(d.getMonth()+1).padStart(2,'0');
+      const hh=String(d.getHours()).padStart(2,'0');
+      const min=String(d.getMinutes()).padStart(2,'0');
       return `Aggiornato il: ${dd}/${mm} – ore ${hh}:${min}`;
     }
-
-    function deterministicOffsetFromString(s) {
-      let acc = 0;
-      for (let i = 0; i < s.length; i++) acc = (acc + s.charCodeAt(i) * (i+1)) % 120;
+    function deterministicOffsetFromString(s){
+      let acc=0;
+      for(let i=0;i<s.length;i++)acc=(acc + s.charCodeAt(i)*(i+1))%120;
       return acc;
     }
-
-    function getFakeTimestamp(storeKey, itemId) {
-      const now = new Date();
-      const storeOffset = deterministicOffsetFromString(storeKey || 'store') % 90; // up to 89 mins
-      const itemOffset = itemId ? (itemId % 13) : 0; // small per-item variation
-      const ts = new Date(now.getTime() - (storeOffset + itemOffset) * 60 * 1000);
+    function getFakeTimestamp(storeKey,itemId){
+      const now=new Date();
+      const storeOffset = deterministicOffsetFromString(storeKey||'store')%90;
+      const itemOffset = itemId? (itemId%13) : 0;
+      const ts=new Date(now.getTime() - (storeOffset+itemOffset)*60*1000);
       return formatTimestamp(ts);
     }
-
-    function getFakeSource(storeKey) {
-      const pretty = storeKey ? (storeKey.charAt(0).toUpperCase() + storeKey.slice(1)) : 'Demo';
+    function getFakeSource(storeKey){
+      const pretty = storeKey ? (storeKey.charAt(0).toUpperCase()+storeKey.slice(1)) : 'Demo';
       return `Fonte: Volantino ${pretty} (demo)`;
     }
-
-    function makePriceMetaRow(storeKey, itemId) {
-      const ts = getFakeTimestamp(storeKey, itemId);
-      const src = getFakeSource(storeKey);
-      return `<div class="price-meta">${ts} • ${src}</div>`;
-    }
-
-    function makeStoreMetaRow(storeKey) {
-      const ts = getFakeTimestamp(storeKey);
-      const src = getFakeSource(storeKey);
-      return `<div class="store-meta">${ts} • ${src}</div>`;
-    }
-    // =========================================================================
+    function makePriceMetaRow(storeKey,itemId){ return `<div class="price-meta">${getFakeTimestamp(storeKey,itemId)} • ${getFakeSource(storeKey)}</div>` }
+    function makeStoreMetaRow(storeKey){ return `<div class="store-meta">${getFakeTimestamp(storeKey)} • ${getFakeSource(storeKey)}</div>` }
 
     let basket = {};
     let userLocation = null;
 
-    function getRadiusKm() {
-        const slider = document.getElementById("radiusSlider");
-        return parseFloat(slider.value);
+    function updateRadiusLabel(v){ document.getElementById('radiusLabel').innerText = parseFloat(v).toFixed(1) + ' km' }
+
+    async function setUserLocation(){
+      const addr=document.getElementById('addressInput').value.trim();
+      const radius=getRadiusKm();
+      const statusEl=document.getElementById('geoLabel');
+      if(!addr){ alert('Inserisci un indirizzo.'); return; }
+      statusEl.innerText = 'Geocodifica...';
+      try{
+        const q = encodeURIComponent(addr + ', Milano, Italia');
+        const url = `https://nominatim.openstreetmap.org/search?q=${q}&format=json&limit=1`;
+        const resp = await fetch(url,{headers:{"Accept":"application/json"}});
+        const data = await resp.json();
+        if(!data || data.length===0){ statusEl.innerText='Indirizzo non trovato.'; return; }
+        const loc=data[0];
+        userLocation = { lat: parseFloat(loc.lat), lon: parseFloat(loc.lon) };
+        statusEl.innerText = `Posizione: ${addr}`;
+      }catch(e){ console.error(e); document.getElementById('geoLabel').innerText='Errore geocodifica'; }
     }
 
-    function updateRadiusLabel(v) {
-        document.getElementById("radiusLabel").innerText = parseFloat(v).toFixed(1) + " km";
+    function getRadiusKm(){ return parseFloat(document.getElementById('radiusSlider').value) }
+
+    function distanceKm(lat1,lon1,lat2,lon2){
+      const R=6371; const toRad=d=>d*Math.PI/180;
+      const dLat=toRad(lat2-lat1); const dLon=toRad(lon2-lon1);
+      const a=Math.sin(dLat/2)**2 + Math.cos(toRad(lat1))*Math.cos(toRad(lat2))*Math.sin(dLon/2)**2;
+      const c=2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a)); return R*c;
     }
 
-    function distanceKm(lat1, lon1, lat2, lon2) {
-        const R = 6371;
-        const toRad = d => d * Math.PI / 180;
-        const dLat = toRad(lat2 - lat1);
-        const dLon = toRad(lon2 - lon1);
-        const a = Math.sin(dLat/2)**2 +
-                  Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
-                  Math.sin(dLon/2)**2;
-        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-        return R * c;
+    function renderProducts(){
+      const grid=document.getElementById('productGrid');
+      const searchVal=document.getElementById('searchInput').value.toLowerCase();
+      const typeFilter=document.getElementById('typeFilter').value;
+      grid.innerHTML='';
+      const filtered = products.filter(p=>{
+        const matchesSearch = p.name.toLowerCase().includes(searchVal);
+        let matchesType=true;
+        if(typeFilter==='perishable') matchesType=p.type==='perishable';
+        else if(typeFilter==='household') matchesType=p.type==='household';
+        else if(typeFilter==='longlife') matchesType=p.type==='longlife';
+        return matchesSearch && matchesType;
+      });
+      filtered.forEach(p=>{
+        const qty=basket[p.id]||0;
+        const isAdded=qty>0;
+        const card=document.createElement('div');
+        card.className='product-card';
+        card.setAttribute('data-added', isAdded);
+        card.innerHTML = `
+          <div class="product-icon">${p.icon}</div>
+          <div class="product-name">${p.name}</div>
+          <div class="product-size">${p.size}</div>
+          <div class="controls">
+            <button class="btn-minus" onclick="updateQty(${p.id},-1)">−</button>
+            <button class="btn-main ${isAdded?'added':''}" onclick="updateQty(${p.id},1)">${isAdded? qty+' nel carrello' : 'Aggiungi +'}</button>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+      updateSummary();
     }
 
-    async function setUserLocation() {
-        const addr = document.getElementById("addressInput").value.trim();
-        const radius = getRadiusKm();
-        const statusEl = document.getElementById("geoStatus");
-        if (!addr) { alert("Inserisci un indirizzo."); return; }
-        if (isNaN(radius) || radius <= 0) { alert("Inserisci un raggio in km valido."); return; }
-        statusEl.innerText = "Geocodifica indirizzo in corso...";
-        try {
-            const q = encodeURIComponent(addr + ", Milano, Italia");
-            const url = `https://nominatim.openstreetmap.org/search?q=${q}&format=json&limit=1`;
-            const resp = await fetch(url, { headers: { "Accept": "application/json" } });
-            const data = await resp.json();
-            if (!data || data.length === 0) {
-                statusEl.innerText = "Indirizzo non trovato.";
-                return;
-            }
-            const loc = data[0];
-            userLocation = { lat: parseFloat(loc.lat), lon: parseFloat(loc.lon) };
-            document.getElementById("geoLabel").innerText = `Posizione impostata: ${addr}`;
-            statusEl.innerText = `Coordinate: ${userLocation.lat.toFixed(5)}, ${userLocation.lon.toFixed(5)} (raggio ${radius.toFixed(1)} km)`;
-        } catch (e) {
-            console.error(e);
-            statusEl.innerText = "Errore durante la geocodifica.";
-        }
+    function updateQty(id,delta){
+      if(!basket[id]) basket[id]=0;
+      basket[id]+=delta; if(basket[id]<=0) delete basket[id];
+      renderProducts(); renderBasketList();
     }
 
-    function renderProducts() {
-        const grid = document.getElementById("productGrid");
-        const searchVal = document.getElementById("searchInput").value.toLowerCase();
-        const typeFilter = document.getElementById("typeFilter").value;
-        grid.innerHTML = "";
+    function updateSummary(){ document.getElementById('barCount').innerText = Object.values(basket).reduce((a,b)=>a+b,0)+' Articoli' }
 
-        const filtered = products.filter(p => {
-            const matchesSearch = p.name.toLowerCase().includes(searchVal);
-            let matchesType = true;
-            if (typeFilter === "perishable") matchesType = p.type === "perishable";
-            else if (typeFilter === "household") matchesType = p.type === "household";
-            else if (typeFilter === "longlife") matchesType = p.type === "longlife";
-            return matchesSearch && matchesType;
+    function toggleModal(id){
+      const el=document.getElementById(id);
+      if(el.style.display==='block'){ el.style.display='none'; }
+      else{
+        if(id==='basketModal') renderBasketList();
+        el.style.display='flex';
+      }
+    }
+
+    function renderBasketList(){
+      const container=document.getElementById('basketListContainer'); container.innerHTML='';
+      if(Object.keys(basket).length===0){ container.innerHTML="<p style='text-align:center;color:#999;margin:18px 0'>Il carrello è vuoto.</p>"; return; }
+      Object.keys(basket).forEach(key=>{
+        const p=products.find(x=>x.id==key); const qty=basket[key];
+        container.innerHTML += `
+          <div style="background:#fff;padding:12px;border-radius:10px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;">
+            <div style="display:flex;gap:12px;align-items:center">
+              <div style="font-size:1.6rem">${p.icon}</div>
+              <div>
+                <div style="font-weight:700">${p.name}</div>
+                <div style="color:#777;font-size:0.9rem">${p.size}</div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <button onclick="updateQty(${p.id},-1)" style="padding:6px 10px">−</button>
+              <div style="min-width:26px;text-align:center;font-weight:700">${qty}</div>
+              <button onclick="updateQty(${p.id},1)" style="padding:6px 10px">+</button>
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    function computeBestTotalWithinRadius(centerRadiusKm, extraKm){
+      if(!userLocation) return null; let best=null;
+      Object.keys(stores).forEach(key=>{
+        const loc=storeLocations[key]; if(!loc) return;
+        const dist=distanceKm(userLocation.lat,userLocation.lon,loc.lat,loc.lon);
+        if(dist>centerRadiusKm+extraKm) return;
+        let total=0;
+        Object.keys(basket).forEach(itemId=>{
+          const p=products.find(x=>x.id==itemId); const qty=basket[itemId];
+          const availMap=p.availability||{}; const isAvailable=(key in availMap)?!!availMap[key]:true;
+          if(isAvailable) total+=p.prices[key]*qty;
         });
+        if(best===null||total<best.total) best={storeKey:key,distKm:dist,total};
+      });
+      return best;
+    }
 
-        filtered.forEach(p => {
-            const qty = basket[p.id] || 0;
-            const isAdded = qty > 0;
-            const card = document.createElement("div");
-            card.className = "product-card";
-            card.setAttribute("data-added", isAdded);
-            card.innerHTML = `
-                <div class="product-icon">${p.icon}</div>
-                <div class="product-name">${p.name}</div>
-                <div class="product-size">${p.size}</div>
-                <div class="controls">
-                    <button class="btn-minus" onclick="updateQty(${p.id}, -1)">−</button>
-                    <button class="btn-main ${isAdded ? 'added' : ''}" onclick="updateQty(${p.id}, 1)">
-                        ${isAdded ? `${qty} nel carrello` : "Aggiungi +"}
-                    </button>
-                </div>
+    function runComparison(){
+      if(Object.keys(basket).length===0){ alert('Il carrello è vuoto!'); return; }
+      if(!userLocation){ alert('Imposta prima una posizione (indirizzo).'); return; }
+      const radius=getRadiusKm(); if(isNaN(radius)||radius<=0){ alert('Raggio km non valido.'); return; }
+
+      const resultsModal=document.getElementById('resultsModal'); const container=document.getElementById('resultsContainer');
+      container.innerHTML=''; const savingsEl=document.getElementById('savingsSummary'); const sortMode=document.getElementById('sortMode').value; const onlyComplete=document.getElementById('onlyComplete').checked;
+      const results=[];
+
+      Object.keys(stores).forEach(key=>{
+        const loc=storeLocations[key]; if(!loc) return;
+        const dist=distanceKm(userLocation.lat,userLocation.lon,loc.lat,loc.lon); if(dist>radius) return;
+
+        let total=0; let breakdownHtml=`<div class="breakdown-list" id="bd-${key}">`; let missingHtml=''; const missingItems=[];
+        const groupedLines={}; const categoryOrder=["Ortofrutta","Carne","Pesce","Salumi/Formaggi","Gastronomia","Latticini","Panetteria","Surgelati","Dispensa","Snack/Dolci","Colazione","Bevande","Cura Casa","Cura Persona","Animali","Casalinghi","Altro",""];
+
+        Object.keys(basket).forEach(itemId=>{
+          const p=products.find(x=>x.id==itemId); const qty=basket[itemId]; const availMap=p.availability||{}; const isAvailable=(key in availMap)?!!availMap[key]:true;
+          const cat=p.category||"Altro"; if(!groupedLines[cat]) groupedLines[cat]=[];
+          if(isAvailable){
+            const itemTotal=p.prices[key]*qty; total+=itemTotal;
+            groupedLines[cat].push(`
+              <div class="breakdown-row">
+                <span>${qty}x ${p.name}</span>
+                <span class="bd-price">€${itemTotal.toFixed(2)}</span>
+              </div>
+              ${makePriceMetaRow(key,p.id)}
+            `);
+          } else {
+            missingItems.push(p);
+            const line=`
+              <div class="breakdown-row" style="color:#b91c1c">
+                <span>${qty}x ${p.name}</span>
+                <span class="bd-price">NON DISP.</span>
+              </div>
+              ${makePriceMetaRow(key,p.id)}
             `;
-            grid.appendChild(card);
+            groupedLines[cat].push(line); missingHtml+=line;
+          }
         });
 
-        updateSummary();
-    }
-
-    function updateQty(id, delta) {
-        if (!basket[id]) basket[id] = 0;
-        basket[id] += delta;
-        if (basket[id] <= 0) delete basket[id];
-        renderProducts();
-        renderBasketList();
-    }
-
-    function updateSummary() {
-        const count = Object.values(basket).reduce((a,b)=>a+b, 0);
-        document.getElementById("barCount").innerText = `${count} Articoli`;
-    }
-
-    function toggleModal(id) {
-        const el = document.getElementById(id);
-        if (el.style.display === "block") el.style.display = "none";
-        else {
-            if(id === 'basketModal') renderBasketList();
-            el.style.display = "block";
-        }
-    }
-
-    function toggleBreakdown(key) {
-        const el = document.getElementById('bd-' + key);
-        const btn = document.getElementById('btn-' + key);
-        if(el.style.display === 'none') {
-            el.style.display = 'block';
-            btn.innerText = '⬆ Chiudi dettagli';
-        } else {
-            el.style.display = 'none';
-            btn.innerText = '⬇ Vedi dettaglio spesa';
-        }
-    }
-
-    function renderBasketList() {
-        const container = document.getElementById("basketListContainer");
-        container.innerHTML = "";
-        if(Object.keys(basket).length === 0) {
-            container.innerHTML = "<p style='text-align:center; color:#999; margin-top:30px'>Il carrello è vuoto.</p>";
-            return;
-        }
-        Object.keys(basket).forEach(key => {
-            const p = products.find(x => x.id == key);
-            const qty = basket[key];
-            container.innerHTML += `
-                <div class="basket-item">
-                    <div style="display:flex; align-items:center;">
-                        <div class="b-icon">${p.icon}</div>
-                        <div>
-                            <div style="font-weight:600; font-size:0.9rem">${p.name}</div>
-                            <div style="font-size:0.8rem; color:#888">${p.size}</div>
-                        </div>
-                    </div>
-                    <div class="b-qty-control">
-                        <button class="b-btn b-minus" onclick="updateQty(${p.id}, -1)">−</button>
-                        <span style="font-weight:700; width:20px; text-align:center;">${qty}</span>
-                        <button class="b-btn b-plus" onclick="updateQty(${p.id}, 1)">+</button>
-                    </div>
-                </div>
-            `;
-        });
-    }
-
-    function computeBestTotalWithinRadius(centerRadiusKm, extraKm) {
-        if (!userLocation) return null;
-        let best = null;
-        Object.keys(stores).forEach(key => {
-            const loc = storeLocations[key];
-            if (!loc) return;
-            const dist = distanceKm(userLocation.lat, userLocation.lon, loc.lat, loc.lon);
-            if (dist > centerRadiusKm + extraKm) return;
-
-            let total = 0;
-            Object.keys(basket).forEach(itemId => {
-                const p = products.find(x => x.id == itemId);
-                const qty = basket[itemId];
-                const availMap = p.availability || {};
-                const isAvailable = (key in availMap) ? !!availMap[key] : true;
-                if (isAvailable) {
-                    total += p.prices[key] * qty;
-                }
-            });
-            if (best === null || total < best.total) {
-                best = { storeKey: key, distKm: dist, total };
-            }
-        });
-        return best;
-    }
-
-    function runComparison() {
-        if (Object.keys(basket).length === 0) { alert("Il carrello è vuoto!"); return; }
-        if (!userLocation) { alert("Imposta prima una posizione (indirizzo)."); return; }
-        const radius = getRadiusKm();
-        if (isNaN(radius) || radius <= 0) { alert("Raggio km non valido."); return; }
-
-        const resultsModal = document.getElementById("resultsModal");
-        const container = document.getElementById("resultsContainer");
-        container.innerHTML = "";
-        const savingsEl = document.getElementById("savingsSummary");
-        const sortMode = document.getElementById("sortMode").value;
-        const onlyComplete = document.getElementById("onlyComplete").checked;
-
-        const results = [];
-
-        Object.keys(stores).forEach(key => {
-            const loc = storeLocations[key];
-            if (!loc) return;
-            const dist = distanceKm(userLocation.lat, userLocation.lon, loc.lat, loc.lon);
-            if (dist > radius) return;
-
-            let total = 0;
-            let breakdownHtml = `<div class="breakdown-list" id="bd-${key}">`;
-            let missingHtml = "";
-            const missingItems = [];
-
-            const groupedLines = {};
-            const categoryOrder = ["Ortofrutta","Carne","Pesce","Salumi/Formaggi","Gastronomia","Latticini","Panetteria","Surgelati","Dispensa","Snack/Dolci","Colazione","Bevande","Cura Casa","Cura Persona","Animali","Casalinghi","Altro",""];
-
-            Object.keys(basket).forEach(itemId => {
-                const p = products.find(x => x.id == itemId);
-                const qty = basket[itemId];
-                const availMap = p.availability || {};
-                const isAvailable = (key in availMap) ? !!availMap[key] : true;
-                const cat = p.category || "Altro";
-                if (!groupedLines[cat]) groupedLines[cat] = [];
-
-                if (isAvailable) {
-                    const itemTotal = p.prices[key] * qty;
-                    total += itemTotal;
-                    groupedLines[cat].push(`
-                        <div class="breakdown-row">
-                            <span>${qty}x ${p.name}</span>
-                            <span class="bd-price">€${itemTotal.toFixed(2)}</span>
-                        </div>
-                        ${makePriceMetaRow(key, p.id)}
-                    `);
-                } else {
-                    missingItems.push(p);
-                    const line = `
-                        <div class="breakdown-row" style="color:#b91c1c;">
-                            <span>${qty}x ${p.name}</span>
-                            <span class="bd-price">NON DISP.</span>
-                        </div>
-                        ${makePriceMetaRow(key, p.id)}
-                    `;
-                    groupedLines[cat].push(line);
-                    missingHtml += line;
-                }
-            });
-
-            if (onlyComplete && missingItems.length > 0) {
-                return;
-            }
-
-            const cats = Object.keys(groupedLines).sort((a,b) => {
-                const ia = categoryOrder.indexOf(a);
-                const ib = categoryOrder.indexOf(b);
-                return (ia === -1 ? 999 : ia) - (ib === -1 ? 999 : ib);
-            });
-
-            cats.forEach(cat => {
-                breakdownHtml += `
-                    <div style="font-size:0.8rem; font-weight:700; margin-top:6px; margin-bottom:2px;">
-                        ${cat}
-                    </div>
-                `;
-                groupedLines[cat].forEach(line => {
-                    breakdownHtml += line;
-                });
-            });
-
-            if (missingItems.length > 0) {
-                breakdownHtml += `
-                    <div style="margin-top:8px; padding-top:8px; border-top:1px dashed #fca5a5;">
-                        <div style="font-size:0.8rem; font-weight:700; color:#b91c1c; margin-bottom:4px;">
-                            ⚠ Prodotti non disponibili in questo supermercato:
-                        </div>
-                        ${missingHtml}
-                    </div>
-                `;
-            }
-
-            breakdownHtml += `</div>`;
-
-            results.push({
-                key,
-                meta: stores[key],
-                distKm: dist,
-                total,
-                missingCount: missingItems.length,
-                breakdown: breakdownHtml
-            });
+        if(onlyComplete && missingItems.length>0) return;
+        const cats=Object.keys(groupedLines).sort((a,b)=>{ const ia=categoryOrder.indexOf(a); const ib=categoryOrder.indexOf(b); return (ia===-1?999:ia)-(ib===-1?999:ib) });
+        cats.forEach(cat=>{
+          breakdownHtml+=`<div style="font-size:0.85rem;font-weight:700;margin-top:6px;margin-bottom:4px">${cat}</div>`;
+          groupedLines[cat].forEach(line=>breakdownHtml+=line);
         });
 
-        if (results.length === 0) {
-            container.innerHTML = "<p style='padding:20px; text-align:center; color:#555'>Nessun supermercato entro il raggio selezionato.</p>";
-            savingsEl.innerText = "";
-            resultsModal.style.display = "block";
-            return;
+        if(missingItems.length>0){
+          breakdownHtml+=`<div style="margin-top:8px;padding-top:8px;border-top:1px dashed #fca5a5">
+            <div style="font-size:0.85rem;font-weight:700;color:#b91c1c;margin-bottom:6px">⚠ Prodotti non disponibili in questo supermercato:</div>
+            ${missingHtml}
+          </div>`;
         }
 
-        results.sort((a,b) => {
-            if (sortMode === "distance") {
-                return a.distKm - b.distKm;
-            } else if (sortMode === "mixed") {
-                const scoreA = a.total + a.distKm * 0.8;
-                const scoreB = b.total + b.distKm * 0.8;
-                return scoreA - scoreB;
-            } else {
-                return a.total - b.total;
-            }
-        });
+        breakdownHtml+=`</div>`;
+        results.push({ key, meta:stores[key], distKm:dist, total, missingCount:missingItems.length, breakdown:breakdownHtml });
+      });
 
-        const bestCurrent = results[0];
-        const bestWider = computeBestTotalWithinRadius(radius + 1, 0);
-        if (bestWider && bestWider.distKm > radius + 0.01 && bestWider.total + 0.01 < bestCurrent.total) {
-            const saved = (bestCurrent.total - bestWider.total).toFixed(2);
-            const newRadius = (radius + 1).toFixed(1);
-            const bestStoreName = stores[bestWider.storeKey].name;
-            savingsEl.innerText =
-                `Con un raggio di ${newRadius} km potresti includere ${bestStoreName} e risparmiare circa €${saved} sulla spesa.`;
-        } else {
-            const bestTotal = bestCurrent.total.toFixed(2);
-            savingsEl.innerText = `Miglior totale nel raggio selezionato: €${bestTotal}.`;
-        }
+      if(results.length===0){ container.innerHTML="<p style='padding:20px;text-align:center;color:#555'>Nessun supermercato entro il raggio selezionato.</p>"; savingsEl.innerText=''; resultsModal.style.display='flex'; return; }
 
-        results.forEach((res, idx) => {
-            const isBest = idx === 0;
-            const hasMissing = res.missingCount > 0;
-            container.innerHTML += `
-                <div class="result-card ${isBest ? 'best' : ''}">
-                    ${isBest ? `<div class="best-badge">🏆 MIGLIORE</div>` : ''}
-                    <div class="store-row">
-                        <div class="store-avatar ${res.meta.class}">${res.meta.short}</div>
-                        <div>
-                            <h3 style="margin:0; font-size:1.1rem">${res.meta.name}</h3>
-                            <div style="font-size:0.85rem; color:#777">Distanza: ${res.distKm.toFixed(1)} km</div>
-                            ${hasMissing ? `
-                                <div style="font-size:0.8rem; color:#b91c1c; margin-top:4px;">
-                                    ❗ Alcuni prodotti del carrello non sono disponibili in questo supermercato
-                                </div>
-                            ` : ""}
-                        </div>
-                    </div>
-                    <div class="total">€${res.total.toFixed(2)}</div>
-                    ${makeStoreMetaRow(res.key)}
-                    <button class="toggle-btn" id="btn-${res.key}" onclick="toggleBreakdown('${res.key}')">⬇ Vedi dettaglio spesa</button>
-                    ${res.breakdown}
-                </div>
-            `;
-        });
+      results.sort((a,b)=>{
+        if(sortMode==='distance') return a.distKm-b.distKm;
+        if(sortMode==='mixed'){ const scoreA=a.total + a.distKm*0.8; const scoreB=b.total + b.distKm*0.8; return scoreA-scoreB; }
+        return a.total-b.total;
+      });
 
-        resultsModal.style.display = "block";
+      const bestCurrent=results[0]; const bestWider=computeBestTotalWithinRadius(getRadiusKm()+1,0);
+      if(bestWider && bestWider.distKm > getRadiusKm()+0.01 && bestWider.total + 0.01 < bestCurrent.total){
+        const saved=(bestCurrent.total-bestWider.total).toFixed(2); const newRadius=(getRadiusKm()+1).toFixed(1);
+        savingsEl.innerText=`Con un raggio di ${newRadius} km potresti includere ${stores[bestWider.storeKey].name} e risparmiare circa €${saved} sulla spesa.`;
+      } else savingsEl.innerText=`Miglior totale nel raggio selezionato: €${bestCurrent.total.toFixed(2)}.`;
+
+      results.forEach((res,idx)=>{
+        const isBest = idx===0; const hasMissing = res.missingCount>0;
+        container.innerHTML += `
+          <div class="result-card ${isBest?'best':''}">
+            ${isBest?'<div style="position:absolute;right:18px;top:-10px;background:var(--primary-color);color:#fff;padding:6px 10px;border-radius:999px;font-weight:800">🏆 MIGLIORE</div>':''}
+            <div class="store-row">
+              <div class="store-avatar ${res.meta.class}" style="background:#ddd;color:#111">${res.meta.short}</div>
+              <div style="flex:1;min-width:0">
+                <div style="font-weight:800;font-size:1.05rem">${res.meta.name}</div>
+                <div style="color:#777;font-size:0.9rem;margin-top:4px">Distanza: ${res.distKm.toFixed(1)} km</div>
+                ${hasMissing?`<div style="color:#b91c1c;margin-top:6px;font-size:0.9rem">❗ Alcuni prodotti del carrello non sono disponibili in questo supermercato</div>` : ''}
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+              <div style="font-weight:800;font-size:1.25rem">€${res.total.toFixed(2)}</div>
+              <div style="min-width:160px;text-align:right">${makeStoreMetaRow(res.key)}</div>
+            </div>
+            <button class="toggle-btn" id="btn-${res.key}" onclick="toggleBreakdown('${res.key}')" style="width:100%;margin-top:12px;padding:10px;border-radius:10px;border:1px solid #eee;background:#fff">⬇ Vedi dettaglio spesa</button>
+            ${res.breakdown}
+          </div>
+        `;
+      });
+
+      resultsModal.style.display='flex';
     }
 
-    document.getElementById("sortMode").addEventListener("change", () => {
-        if (document.getElementById("resultsModal").style.display === "block") runComparison();
-    });
-    document.getElementById("onlyComplete").addEventListener("change", () => {
-        if (document.getElementById("resultsModal").style.display === "block") runComparison();
-    });
+    function toggleBreakdown(key){
+      const el = document.getElementById('bd-'+key);
+      const btn = document.getElementById('btn-'+key);
+      if(!el) return;
+      if(el.style.display==='block'){ el.style.display='none'; if(btn) btn.innerText='⬇ Vedi dettaglio spesa'; }
+      else{ el.style.display='block'; if(btn) btn.innerText='⬆ Chiudi dettagli'; el.scrollIntoView({behavior:'smooth',block:'center'}); }
+    }
 
-    document.getElementById("searchInput").addEventListener("input", renderProducts);
-    document.getElementById("typeFilter").addEventListener("change", renderProducts);
+    document.getElementById('searchInput').addEventListener('input', renderProducts);
+    document.getElementById('typeFilter').addEventListener('change', renderProducts);
+    document.getElementById('sortMode').addEventListener('change', ()=>{ if(document.getElementById('resultsModal').style.display==='flex') runComparison(); });
+    document.getElementById('onlyComplete').addEventListener('change', ()=>{ if(document.getElementById('resultsModal').style.display==='flex') runComparison(); });
+
+    // initial render
     renderProducts();
-</script>
-
+  </script>
 </body>
 </html>
