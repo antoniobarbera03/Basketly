@@ -1,468 +1,249 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Basketly - Risparmia sulla tua spesa con un click</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Basketly - Confronto Dettagliato (Geo)</title>
     <style>
-        :root {
-            --primary-color: #27ae60;
-            --bg-color: #f3f4f6;
-            --text-color: #1a1a1a;
-            --card-bg: #ffffff;
-            --danger-color: #e74c3c;
-            --esselunga: #1c3c6d;
-            --lidl: #0050AA;
-            --carrefour: #1e5bc6;
-            --tigros: #0066cc;
-            --conad: #da291c;
-        }
-        /* Base layout */
-        html,body { height:100%; }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--bg-color);
-            margin: 0;
-            color: var(--text-color);
-            padding-bottom: calc(120px + env(safe-area-inset-bottom)); /* leave space for bottom controls and phone UI */
-        }
-        header {
-            background: white;
-            padding: 15px 20px 20px;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-            border-bottom-left-radius: 20px;
-            border-bottom-right-radius: 20px;
+        :root{
+            --primary-color:#27ae60;
+            --bg-color:#f3f4f6;
+            --text-color:#1a1a1a;
+            --card-bg:#ffffff;
+            --danger-color:#e74c3c;
+            --esselunga:#1c3c6d;
+            --lidl:#0050AA;
+            --carrefour:#1e5bc6;
+            --tigros:#0066cc;
+            --conad:#da291c;
         }
 
-        /* ... existing styles unchanged (shortened for readability here in the editor) ... */
-        .header-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-        .logo {
-            font-weight: 900;
-            font-size: 1.6rem;
-            color: var(--primary-color);
-            letter-spacing: -1px;
-        }
-        .logo span { color: #2c3e50; }
-        .location-badge {
-            background: #f1f3f4;
-            padding: 8px 12px;
-            border-radius: 12px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-        .geo-row {
-            margin-top: 8px;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            align-items: center;
-            font-size: 0.85rem;
-        }
-        .geo-row input[type="text"] {
-            padding: 8px 10px;
-            border-radius: 10px;
-            border: 1px solid #ddd;
-            font-size: 0.85rem;
-        }
-        .geo-btn {
-            padding: 8px 12px;
-            border-radius: 10px;
-            border: none;
-            background: var(--primary-color);
-            color: white;
-            font-size: 0.8rem;
-            font-weight: 600;
-            cursor: pointer;
-        }
-        .geo-status {
-            font-size: 0.8rem;
-            color: #555;
-        }
-        .range-box {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            background: #f1f3f4;
-            padding: 6px 10px;
-            border-radius: 999px;
-        }
-        .range-box input[type="range"] {
-            width: 140px;
-        }
-        .range-value {
-            font-weight: 600;
-            font-size: 0.85rem;
-            min-width: 55px;
-            text-align: right;
-        }
-        .search-row {
-            display: flex;
-            gap: 10px;
-            margin-top: 10px;
-        }
-        .search-box { flex: 1; }
-        .search-box input {
-            width: 100%;
-            padding: 14px 15px 14px 45px;
-            border: 2px solid #eee;
-            border-radius: 14px;
-            font-size: 1rem;
-            outline: none;
-            background: #f9f9f9 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23999' viewBox='0 0 16 16'%3E%3Cpath d='M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z'/%3E%3C/svg%3E") no-repeat 15px center;
-            box-sizing: border-box;
-        }
-        .filter-box select {
-            padding: 10px 12px;
-            border-radius: 14px;
-            border: 2px solid #eee;
-            background: #f9f9f9;
-            font-size: 0.9rem;
-            outline: none;
-            min-width: 150px;
+        html,body{height:100%}
+        body{
+            font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+            background-color:var(--bg-color);
+            margin:0;
+            color:var(--text-color);
+            padding-bottom:calc(120px + env(safe-area-inset-bottom));
         }
 
-        .product-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-            gap: 15px;
-            padding: 20px;
-        }
-        .product-card {
-            background: var(--card-bg);
-            border-radius: 16px;
-            padding: 15px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.03);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-        }
-        .product-icon { font-size: 3.5rem; margin-bottom: 10px; }
-        .product-name {
-            font-weight: 700;
-            font-size: 0.9rem;
-            line-height: 1.3;
-            margin-bottom: 4px;
-            height: 2.4em;
-            overflow: hidden;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-        }
-        .product-size { font-size: 0.75rem; color: #888; margin-bottom: 12px; }
-        .controls {
-            display: flex;
-            width: 100%;
-            gap: 8px;
-            margin-top: auto;
-        }
-        .btn-main {
-            flex-grow: 1;
-            background: var(--text-color);
-            color: white;
-            border: none;
-            padding: 10px 0;
-            border-radius: 10px;
-            font-weight: 600;
-            font-size: 0.85rem;
-            cursor: pointer;
-        }
-        .btn-main.added { background: var(--primary-color); }
-        .btn-minus {
-            display: none;
-            width: 38px;
-            background: #fee2e2;
-            color: var(--danger-color);
-            border: none;
-            border-radius: 10px;
-            font-weight: 800;
-            font-size: 1.2rem;
-            cursor: pointer;
-            align-items: center;
-            justify-content: center;
-        }
-        .product-card[data-added="true"] .btn-minus { display: flex; }
-
-        /* Bottom bar - responsive improvements */
-        .bottom-bar {
-            position: fixed;
-            bottom: 0; left: 0; right: 0;
-            background: white;
-            padding: 10px 16px;
-            box-shadow: 0 -5px 20px rgba(0,0,0,0.12);
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            z-index: 1200;
-            border-top: 1px solid #eee;
-            flex-wrap: nowrap; /* will change via media query */
-            /* reserve additional space for mobile safe area */
-            padding-bottom: calc(10px + env(safe-area-inset-bottom));
-        }
-        .basket-summary {
-            display: flex;
-            flex-direction: column;
-            min-width: 140px;
-            flex: 0 0 auto;
-        }
-        .basket-count { font-weight: 800; font-size: 1.1rem; }
-        .basket-link { font-size: 0.8rem; text-decoration: underline; cursor: pointer; color: #555; }
-
-        .bottom-controls {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            flex: 1 1 auto;
-            justify-content: flex-end;
-            flex-wrap: nowrap;
-        }
-        .pill-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            background: #f1f3f4;
-            border-radius: 999px;
-            padding: 6px 10px;
-            font-size: 0.8rem;
-            border: none;
-            cursor: pointer;
-            color: #333;
-            flex: 0 1 auto;
-            min-width: 90px;
-        }
-        .pill-btn select {
-            border: none;
-            background: transparent;
-            font-size: 0.8rem;
-            outline: none;
-            cursor: pointer;
-        }
-        .pill-icon {
-            font-size: 0.9rem;
-        }
-        .toggle-complete {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            background: #f1f3f4;
-            border-radius: 999px;
-            padding: 4px 8px;
-            font-size: 0.75rem;
-            flex: 0 1 auto;
-        }
-        .toggle-switch {
-            position: relative;
-            width: 30px;
-            height: 16px;
-            background: #d1d5db;
-            border-radius: 999px;
-            cursor: pointer;
-        }
-        .toggle-switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-        .toggle-knob {
-            position: absolute;
-            top: 2px;
-            left: 2px;
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background: white;
-            transition: 0.2s;
-        }
-        .toggle-switch input:checked + .toggle-knob {
-            transform: translateX(12px);
+        header{
+            background:white;
+            padding:15px 20px 20px;
+            position:sticky;
+            top:0;
+            z-index:100;
+            box-shadow:0 4px 15px rgba(0,0,0,0.05);
+            border-bottom-left-radius:20px;
+            border-bottom-right-radius:20px;
         }
 
-        .compare-btn {
-            background: var(--primary-color);
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 24px;
-            font-weight: 700;
-            font-size: 0.95rem;
-            box-shadow: 0 4px 15px rgba(39, 174, 96, 0.4);
-            cursor: pointer;
-            white-space: nowrap;
-            flex: 0 0 auto;
-            min-width: 140px; /* keep tappable */
+        .header-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+        .logo{font-weight:900;font-size:1.6rem;color:var(--primary-color);letter-spacing:-1px}
+        .logo span{color:#2c3e50}
+        .location-badge{background:#f1f3f4;padding:8px 12px;border-radius:12px;font-size:0.9rem;font-weight:600;display:flex;align-items:center;gap:5px}
+        .geo-row{margin-top:8px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:0.85rem}
+        .geo-row input[type="text"]{padding:8px 10px;border-radius:10px;border:1px solid #ddd;font-size:0.85rem}
+        .geo-btn{padding:8px 12px;border-radius:10px;border:none;background:var(--primary-color);color:white;font-size:0.8rem;font-weight:600;cursor:pointer}
+        .geo-status{font-size:0.8rem;color:#555}
+        .range-box{display:flex;align-items:center;gap:8px;background:#f1f3f4;padding:6px 10px;border-radius:999px}
+        .range-box input[type="range"]{width:140px}
+        .range-value{font-weight:600;font-size:0.85rem;min-width:55px;text-align:right}
+        .search-row{display:flex;gap:10px;margin-top:10px}
+        .search-box{flex:1}
+        .search-box input{
+            width:100%;padding:14px 15px 14px 45px;border:2px solid #eee;border-radius:14px;font-size:1rem;outline:none;
+            background:#f9f9f9 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23999' viewBox='0 0 16 16'%3E%3Cpath d='M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z'/%3E%3C/svg%3E") no-repeat 15px center;box-sizing:border-box
+        }
+        .filter-box select{padding:10px 12px;border-radius:14px;border:2px solid #eee;background:#f9f9f9;font-size:0.9rem;outline:none;min-width:150px}
+
+        /* product grid */
+        .product-grid{
+            display:grid;
+            grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
+            gap:15px;
+            padding:20px;
+        }
+        .product-card{background:var(--card-bg);border-radius:16px;padding:15px;box-shadow:0 4px 6px rgba(0,0,0,0.03);display:flex;flex-direction:column;align-items:center;text-align:center}
+        .product-icon{font-size:3.5rem;margin-bottom:10px}
+        .product-name{font-weight:700;font-size:0.9rem;line-height:1.3;margin-bottom:4px;height:2.4em;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+        .product-size{font-size:0.75rem;color:#888;margin-bottom:12px}
+        .controls{display:flex;width:100%;gap:8px;margin-top:auto}
+        .btn-main{flex-grow:1;background:var(--text-color);color:white;border:none;padding:10px 0;border-radius:10px;font-weight:600;font-size:0.85rem;cursor:pointer}
+        .btn-main.added{background:var(--primary-color)}
+        .btn-minus{display:none;width:38px;background:#fee2e2;color:var(--danger-color);border:none;border-radius:10px;font-weight:800;font-size:1.2rem;cursor:pointer;align-items:center;justify-content:center}
+        .product-card[data-added="true"] .btn-minus{display:flex}
+
+        /* -------------------- BOTTOM BAR (adjusted) -------------------- */
+        .bottom-bar{
+            position:fixed;
+            left:0;right:0;bottom:0;
+            background:white;
+            display:flex;
+            align-items:center;
+            gap:10px;
+            z-index:1200;
+            border-top:1px solid #eee;
+            box-shadow:0 -6px 18px rgba(0,0,0,0.08);
+            padding:10px 14px;
+            /* slightly reduced height from previous "too big" version */
+            height:auto;
+            min-height:54px;
+            /* keep controls flexible */
+            flex-wrap:nowrap;
+        }
+
+        .basket-summary{
+            display:flex;
+            flex-direction:column;
+            min-width:120px;
+            flex:0 0 auto;
+        }
+        .basket-count{font-weight:800;font-size:1.05rem}
+        .basket-link{font-size:0.78rem;text-decoration:underline;cursor:pointer;color:#555}
+
+        .bottom-controls{
+            display:flex;
+            align-items:center;
+            gap:8px;
+            flex:1 1 auto;
+            justify-content:flex-end;
+            flex-wrap:nowrap;
+        }
+
+        /* compact pill for ordering */
+        .pill-btn{
+            display:inline-flex;
+            align-items:center;
+            gap:8px;
+            background:#f1f3f4;
+            border-radius:999px;
+            padding:6px 10px;
+            font-size:0.85rem;
+            border:none;
+            cursor:pointer;
+            color:#333;
+            flex:0 0 auto;
+            min-width:90px;
+        }
+        .pill-btn .pill-icon{font-size:0.95rem}
+        .pill-btn .pill-text{display:inline-block}
+        .pill-btn select{border:none;background:transparent;font-size:0.85rem;outline:none;cursor:pointer}
+
+        .toggle-complete{display:inline-flex;align-items:center;gap:6px;background:#f1f3f4;border-radius:999px;padding:6px 10px;font-size:0.78rem;flex:0 0 auto}
+        .toggle-switch{position:relative;width:30px;height:16px;background:#d1d5db;border-radius:999px;cursor:pointer}
+        .toggle-switch input{opacity:0;width:0;height:0}
+        .toggle-knob{position:absolute;top:2px;left:2px;width:12px;height:12px;border-radius:50%;background:white;transition:0.2s}
+        .toggle-switch input:checked + .toggle-knob{transform:translateX(12px)}
+
+        /* compare button reduced size / less tall */
+        .compare-btn{
+            background:var(--primary-color);
+            color:white;
+            border:none;
+            padding:10px 16px; /* smaller padding */
+            border-radius:16px; /* smaller radius than before */
+            font-weight:700;
+            font-size:0.95rem;
+            box-shadow:0 6px 14px rgba(39,174,96,0.25);
+            cursor:pointer;
+            white-space:nowrap;
+            flex:0 0 auto;
+            min-width:120px;
+            max-width:220px;
+            text-align:center;
         }
 
         /* Modals and other components */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.6);
-            backdrop-filter: blur(4px);
-            z-index: 2000;
-        }
-        .modal-card {
-            position: absolute;
-            bottom: 0;
-            width: 100%;
-            max-height: 85vh;
-            background: #f9fafb;
-            border-radius: 24px 24px 0 0;
-            overflow-y: auto;
-            animation: slideUp 0.3s ease-out;
-            box-sizing: border-box;
-        }
-        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-        .modal-header {
-            position: sticky; top: 0; background: white; padding: 20px;
-            display: flex; justify-content: space-between; align-items: center;
-            border-bottom: 1px solid #eee; z-index: 10;
-        }
-        .close-icon { font-size: 1.5rem; cursor: pointer; background:none; border:none; padding: 5px; }
-        .basket-list { padding: 20px; }
-        .basket-item {
-            background: white; padding: 15px; border-radius: 12px;
-            margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-        }
-        .b-icon { font-size: 2rem; margin-right: 15px; width: 40px; text-align: center; }
-        .b-qty-control { display: flex; align-items: center; gap: 8px; background: #f3f4f6; padding: 5px; border-radius: 8px; }
-        .b-btn { width: 28px; height: 28px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-        .b-minus { background: white; color: var(--danger-color); }
-        .b-plus { background: white; color: var(--primary-color); }
+        .modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);z-index:2000}
+        .modal-card{position:absolute;bottom:0;width:100%;max-height:85vh;background:#f9fafb;border-radius:24px 24px 0 0;overflow-y:auto;animation:slideUp 0.3s ease-out;box-sizing:border-box}
+        @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+        .modal-header{position:sticky;top:0;background:white;padding:20px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #eee;z-index:10}
+        .close-icon{font-size:1.5rem;cursor:pointer;background:none;border:none;padding:5px}
+        .basket-list{padding:20px}
+        .basket-item{background:white;padding:15px;border-radius:12px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 4px rgba(0,0,0,0.02)}
+        .b-icon{font-size:2rem;margin-right:15px;width:40px;text-align:center}
+        .b-qty-control{display:flex;align-items:center;gap:8px;background:#f3f4f6;padding:5px;border-radius:8px}
+        .b-btn{width:28px;height:28px;border:none;border-radius:6px;font-weight:bold;cursor:pointer;display:flex;align-items:center;justify-content:center}
+        .b-minus{background:white;color:var(--danger-color)}
+        .b-plus{background:white;color:var(--primary-color)}
 
-        .result-card {
-            background: white; border-radius: 16px; padding: 20px; margin: 20px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05); position: relative; border: 2px solid transparent;
-        }
-        .result-card.best { border-color: var(--primary-color); background: #f0fdf4; }
-        .best-badge {
-            position: absolute; top: -10px; right: 20px; background: var(--primary-color);
-            color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 800;
-        }
-        .store-row { display: flex; align-items: center; gap: 15px; margin-bottom: 15px; border-bottom: 1px dashed #eee; padding-bottom: 15px; }
-        .store-avatar {
-            width: 50px; height: 50px; border-radius: 10px;
-            display: flex; align-items: center; justify-content: center;
-            color: white; font-weight: 900; font-size: 1.2rem;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        .s-esselunga { background-color: var(--esselunga); color: #ffcc00; position:relative; }
-        .s-esselunga:after { content:"S"; position:absolute; top: -5px; font-size: 1.5rem; }
-        .s-lidl { background-color: var(--lidl); color: #FFF000; border-bottom: 4px solid #E60A14; }
-        .s-carrefour { background-color: var(--carrefour); }
-        .s-tigros { background-color: var(--tigros); border-bottom: 4px solid #ffd700; }
-        .s-conad { background-color: white; border: 2px solid var(--conad); color: var(--conad); }
-        .total { font-size: 1.5rem; font-weight: 800; text-align: right; margin-top: 10px; color: var(--text-color); }
+        .result-card{background:white;border-radius:16px;padding:20px;margin:20px;box-shadow:0 4px 10px rgba(0,0,0,0.05);position:relative;border:2px solid transparent}
+        .result-card.best{border-color:var(--primary-color);background:#f0fdf4}
+        .best-badge{position:absolute;top:-10px;right:20px;background:var(--primary-color);color:white;padding:4px 12px;border-radius:20px;font-size:0.75rem;font-weight:800}
+        .store-row{display:flex;align-items:center;gap:15px;margin-bottom:15px;border-bottom:1px dashed #eee;padding-bottom:15px}
+        .store-avatar{width:50px;height:50px;border-radius:10px;display:flex;align-items:center;justify-content:center;color:white;font-weight:900;font-size:1.2rem;box-shadow:0 2px 5px rgba(0,0,0,0.1)}
+        .s-esselunga{background-color:var(--esselunga);color:#ffcc00;position:relative}
+        .s-esselunga:after{content:"S";position:absolute;top:-5px;font-size:1.5rem}
+        .s-lidl{background-color:var(--lidl);color:#FFF000;border-bottom:4px solid #E60A14}
+        .s-carrefour{background-color:var(--carrefour)}
+        .s-tigros{background-color:var(--tigros);border-bottom:4px solid #ffd700}
+        .s-conad{background-color:white;border:2px solid var(--conad);color:var(--conad)}
+        .total{font-size:1.5rem;font-weight:800;text-align:right;margin-top:10px;color:var(--text-color)}
 
-        .toggle-btn {
-            width: 100%;
-            background: none;
-            border: none;
-            color: #666;
-            font-size: 0.85rem;
-            padding: 10px;
-            margin-top: 10px;
-            border-top: 1px solid #eee;
-            cursor: pointer;
-            text-align: center;
-            font-weight: 600;
-        }
-        .breakdown-list {
-            background: #f9f9f9;
-            margin-top: 10px;
-            padding: 10px;
-            border-radius: 8px;
-            display: none;
-        }
-        .breakdown-row {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.85rem;
-            padding: 4px 0;
-            border-bottom: 1px dashed #eee;
-        }
-        .breakdown-row:last-child { border-bottom: none; }
-        .bd-price { font-weight: 600; color: #333; }
+        .toggle-btn{width:100%;background:none;border:none;color:#666;font-size:0.85rem;padding:10px;margin-top:10px;border-top:1px solid #eee;cursor:pointer;text-align:center;font-weight:600}
+        .breakdown-list{background:#f9f9f9;margin-top:10px;padding:10px;border-radius:8px;display:none}
+        .breakdown-row{display:flex;justify-content:space-between;font-size:0.85rem;padding:4px 0;border-bottom:1px dashed #eee}
+        .breakdown-row:last-child{border-bottom:none}
+        .bd-price{font-weight:600;color:#333}
 
-        /* New small meta styles for timestamps and sources */
-        .meta-small {
-            font-size: 0.75rem;
-            color: #586069;
-            margin-top: 6px;
-        }
-        .meta-small .source {
-            font-weight: 700;
-            color: #333;
-        }
+        .meta-small{font-size:0.75rem;color:#586069;margin-top:6px}
+        .meta-small .source{font-weight:700;color:#333}
 
-        /* ---------------------- RESPONSIVE RULES ---------------------- */
-        /* Improve bottom bar layout on small screens */
-        @media (max-width: 720px) {
-            .product-grid { padding-bottom: 220px; } /* ensure grid not hidden under bottom bar */
-            .bottom-bar {
-                flex-wrap: wrap;
-                align-items: center;
-                padding: 10px 12px calc(12px + env(safe-area-inset-bottom));
-                gap: 8px;
+        /* ---------------------- RESPONSIVE ADJUSTMENTS ---------------------- */
+        @media (max-width:720px){
+            /* ensure grid doesn't get hidden behind bar - tuned to be smaller than before */
+            .product-grid{padding-bottom:180px}
+            .bottom-bar{
+                padding:8px 12px;
+                gap:8px;
+                min-height:50px;
             }
-            .basket-summary {
-                order: 1;
-                width: 100%;
-                display: flex;
-                flex-direction: row;
-                align-items: center;
-                justify-content: space-between;
-                padding-right: 8px;
+            .basket-summary{
+                order:1;
+                width:auto;
+                display:flex;
+                flex-direction:row;
+                align-items:center;
+                justify-content:flex-start;
+                gap:8px;
             }
-            .basket-count { font-size: 1rem; }
-            .basket-link { font-size: 0.8rem; }
-            .bottom-controls {
-                order: 2;
-                width: 100%;
-                justify-content: space-between;
-                gap: 8px;
+            .basket-count{font-size:0.95rem}
+            .basket-link{font-size:0.76rem}
+
+            /* compress pill btn text on very small widths so controls take less space */
+            .pill-btn{padding:6px 8px;min-width:70px}
+            .pill-btn .pill-text{display:inline-block}
+            .pill-btn .pill-icon{font-size:0.95rem}
+
+            .toggle-complete{padding:6px 8px;font-size:0.72rem}
+
+            /* compare button becomes shorter and more compact */
+            .compare-btn{
+                min-width:110px;
+                padding:9px 12px;
+                border-radius:14px;
+                font-size:0.95rem;
+                box-shadow:0 6px 12px rgba(39,174,96,0.22);
             }
-            .pill-btn, .toggle-complete {
-                flex: 1 1 auto;
-                min-width: 0;
-            }
-            .compare-btn {
-                order: 3;
-                width: 100%;
-                min-width: 0;
-                padding: 12px;
-                border-radius: 14px;
-                font-size: 1rem;
-            }
-            /* make toggle button and selects more compact */
-            .pill-btn select { font-size: 0.85rem; }
+
+            /* allow bottom-controls to wrap but keep compare button visible on a second line if needed */
+            .bottom-controls{flex-wrap:wrap;justify-content:flex-end}
         }
 
-        /* Slight adjustments for very narrow phones */
-        @media (max-width: 420px) {
-            .product-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap:12px; padding: 14px; padding-bottom: 260px; }
-            .compare-btn { font-size: 0.95rem; padding: 12px; }
-            .search-box input { padding: 12px 12px 12px 40px; }
+        /* very narrow phones: hide pill text to give more room and keep compare button accessible */
+        @media (max-width:420px){
+            .product-grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;padding:14px;padding-bottom:200px}
+            .pill-btn .pill-text{display:none} /* collapse "Ordina" text to just icon */
+            .pill-btn{padding:6px;min-width:44px}
+            .compare-btn{min-width:100px;padding:10px 12px;font-size:0.94rem}
+            .basket-count{font-size:0.95rem}
         }
 
-        /* Desktop - ensure components align nicely */
-        @media (min-width: 721px) {
-            .bottom-bar { flex-wrap: nowrap; padding-bottom: 10px; }
-            .basket-summary { min-width: 160px; }
-            .bottom-controls { justify-content: flex-end; }
-            .compare-btn { min-width: 140px; }
+        @media (min-width:721px){
+            /* desktop: keep a slightly larger bottom bar but not huge */
+            .bottom-bar{padding:10px 18px;min-height:56px}
+            .product-grid{padding-bottom:120px}
         }
     </style>
 </head>
@@ -471,22 +252,20 @@
 <header>
     <div class="header-top">
         <div class="logo">Basketly<span>.</span></div>
-        <div class="location-badge">
-            📍
-            <span id="geoLabel">Posizione non impostata</span>
-        </div>
+        <div class="location-badge">📍 <span id="geoLabel">Posizione non impostata</span></div>
     </div>
+
     <div class="geo-row">
         <input type="text" id="addressInput" placeholder="Inserisci indirizzo (es. Via Candiani 131, Milano)" size="35">
         <div class="range-box">
             <span style="font-size:0.8rem;">Raggio</span>
-            <input type="range" id="radiusSlider" min="1" max="10" step="0.5" value="3"
-                   oninput="updateRadiusLabel(this.value)">
+            <input type="range" id="radiusSlider" min="1" max="10" step="0.5" value="3" oninput="updateRadiusLabel(this.value)">
             <span class="range-value" id="radiusLabel">3.0 km</span>
         </div>
         <button class="geo-btn" onclick="setUserLocation()">Imposta posizione</button>
         <span class="geo-status" id="geoStatus"></span>
     </div>
+
     <div class="search-row">
         <div class="search-box">
             <input type="text" id="searchInput" placeholder="Cerca prodotti...">
@@ -504,6 +283,7 @@
 
 <div class="product-grid" id="productGrid"></div>
 
+<!-- bottom bar -->
 <div class="bottom-bar" role="navigation" aria-label="Barra inferiore">
     <div class="basket-summary">
         <span class="basket-count" id="barCount">0 Articoli</span>
@@ -513,7 +293,7 @@
     <div class="bottom-controls" id="bottomControls">
         <button class="pill-btn" type="button" aria-label="Ordina e opzioni">
             <span class="pill-icon">↕️</span>
-            <span>Ordina</span>
+            <span class="pill-text">Ordina</span>
             <select id="sortMode" aria-label="Modalità di ordinamento">
                 <option value="price">Prezzo</option>
                 <option value="distance">Distanza</option>
@@ -548,11 +328,11 @@
         <div class="modal-header">
             <div style="flex:1; min-width:0;">
                 <h2 style="margin:0">Migliori Prezzi</h2>
-                <div id="savingsSummary" style="font-size:0.8rem; color:#555; margin-top:4px;"></div>
+                <div id="savingsSummary" style="font-size:0.8rem;color:#555;margin-top:4px"></div>
             </div>
             <button class="close-icon" onclick="toggleModal('resultsModal')">✕</button>
         </div>
-        <div id="resultsContainer" style="padding-bottom: 40px;"></div>
+        <div id="resultsContainer" style="padding-bottom:40px"></div>
     </div>
 </div>
 
@@ -690,209 +470,166 @@
     ];
 
     const stores = {
-        esselunga: { name: "Esselunga", class: "s-esselunga", short: "E" },
-        lidl: { name: "Lidl", class: "s-lidl", short: "L" },
-        carrefour: { name: "Carrefour", class: "s-carrefour", short: "C" },
-        tigros: { name: "Tigros", class: "s-tigros", short: "T" },
-        conad: { name: "Conad", class: "s-conad", short: "C" }
+        esselunga:{name:"Esselunga",class:"s-esselunga",short:"E"},
+        lidl:{name:"Lidl",class:"s-lidl",short:"L"},
+        carrefour:{name:"Carrefour",class:"s-carrefour",short:"C"},
+        tigros:{name:"Tigros",class:"s-tigros",short:"T"},
+        conad:{name:"Conad",class:"s-conad",short:"C"}
     };
 
     const storeLocations = {
-        esselunga: { lat: 45.485, lon: 9.228 },
-        lidl:      { lat: 45.493, lon: 9.210 },
-        carrefour: { lat: 45.462, lon: 9.196 },
-        tigros:    { lat: 45.505, lon: 9.160 },
-        conad:     { lat: 45.474, lon: 9.214 }
+        esselunga:{lat:45.485,lon:9.228},
+        lidl:{lat:45.493,lon:9.210},
+        carrefour:{lat:45.462,lon:9.196},
+        tigros:{lat:45.505,lon:9.160},
+        conad:{lat:45.474,lon:9.214}
     };
 
     let basket = {};
     let userLocation = null;
 
-    function getRadiusKm() {
-        const slider = document.getElementById("radiusSlider");
-        return parseFloat(slider.value);
+    function getRadiusKm(){const s=document.getElementById("radiusSlider");return parseFloat(s.value)}
+    function updateRadiusLabel(v){document.getElementById("radiusLabel").innerText=parseFloat(v).toFixed(1)+" km"}
+
+    function distanceKm(lat1,lon1,lat2,lon2){
+        const R=6371;const toRad=d=>d*Math.PI/180;
+        const dLat=toRad(lat2-lat1),dLon=toRad(lon2-lon1);
+        const a=Math.sin(dLat/2)**2 + Math.cos(toRad(lat1))*Math.cos(toRad(lat2))*Math.sin(dLon/2)**2;
+        const c=2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+        return R*c;
     }
 
-    function updateRadiusLabel(v) {
-        document.getElementById("radiusLabel").innerText = parseFloat(v).toFixed(1) + " km";
+    /* --- fake timestamp & source helpers (kept from previous implementation) --- */
+    function pad(n){return(n<10?'0':'')+n}
+    function getStoreBaseDate(storeKey){
+        const now=new Date();
+        let seed=0;
+        for(let i=0;i<storeKey.length;i++) seed+=storeKey.charCodeAt(i);
+        const minutesOffset=(seed%180);
+        return new Date(now.getTime()-minutesOffset*60*1000);
     }
-
-    function distanceKm(lat1, lon1, lat2, lon2) {
-        const R = 6371;
-        const toRad = d => d * Math.PI / 180;
-        const dLat = toRad(lat2 - lat1);
-        const dLon = toRad(lon2 - lon1);
-        const a = Math.sin(dLat/2)**2 +
-                  Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
-                  Math.sin(dLon/2)**2;
-        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-        return R * c;
-    }
-
-    // --- New helper functions to generate coherent fake timestamps and sources ---
-    function pad(n) { return (n < 10 ? '0' : '') + n; }
-
-    // base date for a store (varies deterministically by store key)
-    function getStoreBaseDate(storeKey) {
-        const now = new Date();
-        let seed = 0;
-        for (let i = 0; i < storeKey.length; i++) seed += storeKey.charCodeAt(i);
-        const minutesOffset = (seed % 180); // up to 3 hours difference
-        return new Date(now.getTime() - minutesOffset * 60 * 1000);
-    }
-
-    // timestamp for a specific product in a store
-    function fakeTimestampForPrice(storeKey, productId) {
-        const base = getStoreBaseDate(storeKey);
-        const extra = productId % 45; // small deterministic offset
-        const d = new Date(base.getTime() - extra * 60 * 1000);
+    function fakeTimestampForPrice(storeKey,productId){
+        const base=getStoreBaseDate(storeKey);
+        const extra=productId%45;
+        const d=new Date(base.getTime()-extra*60*1000);
         return formatFriendlyTimestamp(d);
     }
+    function formatFriendlyTimestamp(d){
+        const now=new Date();
+        const sameDay=d.getDate()===now.getDate()&&d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear();
+        const hh=pad(d.getHours()); const mm=pad(d.getMinutes());
+        if(sameDay) return `oggi – ore ${hh}:${mm}`;
+        const dd=pad(d.getDate()); const mmn=pad(d.getMonth()+1);
+        return `${dd}/${mmn} – ore ${hh}:${mm}`;
+    }
+    function fakeTimestampForStore(storeKey){ return formatFriendlyTimestamp(getStoreBaseDate(storeKey)); }
+    function fakeSourceForStore(storeKey){ return `Volantino ${stores[storeKey].name} (demo)`; }
+    /* --- end helpers --- */
 
-    // friendly formatting: "oggi – ore HH:MM" or "DD/MM – ore HH:MM"
-    function formatFriendlyTimestamp(d) {
-        const now = new Date();
-        const sameDay = d.getDate() === now.getDate() && d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
-        const hh = pad(d.getHours());
-        const mm = pad(d.getMinutes());
-        if (sameDay) {
-            return `oggi – ore ${hh}:${mm}`;
-        } else {
-            const dd = pad(d.getDate());
-            const mmn = pad(d.getMonth() + 1);
-            return `${dd}/${mmn} – ore ${hh}:${mm}`;
-        }
+    async function setUserLocation(){
+        const addr=document.getElementById("addressInput").value.trim();
+        const radius=getRadiusKm();
+        const statusEl=document.getElementById("geoStatus");
+        if(!addr){alert("Inserisci un indirizzo.");return;}
+        if(isNaN(radius)||radius<=0){alert("Inserisci un raggio in km valido.");return;}
+        statusEl.innerText="Geocodifica indirizzo in corso...";
+        try{
+            const q=encodeURIComponent(addr+", Milano, Italia");
+            const url=`https://nominatim.openstreetmap.org/search?q=${q}&format=json&limit=1`;
+            const resp=await fetch(url,{headers:{"Accept":"application/json"}});
+            const data=await resp.json();
+            if(!data||data.length===0){statusEl.innerText="Indirizzo non trovato.";return;}
+            const loc=data[0];
+            userLocation={lat:parseFloat(loc.lat),lon:parseFloat(loc.lon)};
+            document.getElementById("geoLabel").innerText=`Posizione impostata: ${addr}`;
+            statusEl.innerText=`Coordinate: ${userLocation.lat.toFixed(5)}, ${userLocation.lon.toFixed(5)} (raggio ${radius.toFixed(1)} km)`;
+        }catch(e){console.error(e);statusEl.innerText="Errore durante la geocodifica."}
     }
 
-    function fakeTimestampForStore(storeKey) {
-        return formatFriendlyTimestamp(getStoreBaseDate(storeKey));
-    }
-
-    function fakeSourceForStore(storeKey) {
-        return `Volantino ${stores[storeKey].name} (demo)`;
-    }
-    // --- end helpers ---
-
-    async function setUserLocation() {
-        const addr = document.getElementById("addressInput").value.trim();
-        const radius = getRadiusKm();
-        const statusEl = document.getElementById("geoStatus");
-        if (!addr) { alert("Inserisci un indirizzo."); return; }
-        if (isNaN(radius) || radius <= 0) { alert("Inserisci un raggio in km valido."); return; }
-        statusEl.innerText = "Geocodifica indirizzo in corso...";
-        try {
-            const q = encodeURIComponent(addr + ", Milano, Italia");
-            const url = `https://nominatim.openstreetmap.org/search?q=${q}&format=json&limit=1`;
-            const resp = await fetch(url, { headers: { "Accept": "application/json" } });
-            const data = await resp.json();
-            if (!data || data.length === 0) {
-                statusEl.innerText = "Indirizzo non trovato.";
-                return;
-            }
-            const loc = data[0];
-            userLocation = { lat: parseFloat(loc.lat), lon: parseFloat(loc.lon) };
-            document.getElementById("geoLabel").innerText = `Posizione impostata: ${addr}`;
-            statusEl.innerText = `Coordinate: ${userLocation.lat.toFixed(5)}, ${userLocation.lon.toFixed(5)} (raggio ${radius.toFixed(1)} km)`;
-        } catch (e) {
-            console.error(e);
-            statusEl.innerText = "Errore durante la geocodifica.";
-        }
-    }
-
-    function renderProducts() {
-        const grid = document.getElementById("productGrid");
-        const searchVal = document.getElementById("searchInput").value.toLowerCase();
-        const typeFilter = document.getElementById("typeFilter").value;
-        grid.innerHTML = "";
-
-        const filtered = products.filter(p => {
-            const matchesSearch = p.name.toLowerCase().includes(searchVal);
-            let matchesType = true;
-            if (typeFilter === "perishable") matchesType = p.type === "perishable";
-            else if (typeFilter === "household") matchesType = p.type === "household";
-            else if (typeFilter === "longlife") matchesType = p.type === "longlife";
+    function renderProducts(){
+        const grid=document.getElementById("productGrid");
+        const searchVal=document.getElementById("searchInput").value.toLowerCase();
+        const typeFilter=document.getElementById("typeFilter").value;
+        grid.innerHTML="";
+        const filtered=products.filter(p=>{
+            const matchesSearch=p.name.toLowerCase().includes(searchVal);
+            let matchesType=true;
+            if(typeFilter==="perishable") matchesType=p.type==="perishable";
+            else if(typeFilter==="household") matchesType=p.type==="household";
+            else if(typeFilter==="longlife") matchesType=p.type==="longlife";
             return matchesSearch && matchesType;
         });
-
-        filtered.forEach(p => {
-            const qty = basket[p.id] || 0;
-            const isAdded = qty > 0;
-            const card = document.createElement("div");
-            card.className = "product-card";
-            card.setAttribute("data-added", isAdded);
-            card.innerHTML = `
+        filtered.forEach(p=>{
+            const qty=basket[p.id]||0;
+            const isAdded=qty>0;
+            const card=document.createElement("div");
+            card.className="product-card";
+            card.setAttribute("data-added",isAdded);
+            card.innerHTML=`
                 <div class="product-icon">${p.icon}</div>
                 <div class="product-name">${p.name}</div>
                 <div class="product-size">${p.size}</div>
                 <div class="controls">
                     <button class="btn-minus" onclick="updateQty(${p.id}, -1)">−</button>
-                    <button class="btn-main ${isAdded ? 'added' : ''}" onclick="updateQty(${p.id}, 1)">
-                        ${isAdded ? `${qty} nel carrello` : "Aggiungi +"}
+                    <button class="btn-main ${isAdded?'added':''}" onclick="updateQty(${p.id}, 1)">
+                        ${isAdded?`${qty} nel carrello`:"Aggiungi +"}
                     </button>
                 </div>
             `;
             grid.appendChild(card);
         });
-
         updateSummary();
     }
 
-    function updateQty(id, delta) {
-        if (!basket[id]) basket[id] = 0;
-        basket[id] += delta;
-        if (basket[id] <= 0) delete basket[id];
+    function updateQty(id,delta){
+        if(!basket[id]) basket[id]=0;
+        basket[id]+=delta;
+        if(basket[id]<=0) delete basket[id];
         renderProducts();
         renderBasketList();
     }
 
-    function updateSummary() {
-        const count = Object.values(basket).reduce((a,b)=>a+b, 0);
-        document.getElementById("barCount").innerText = `${count} Articoli`;
+    function updateSummary(){
+        const count=Object.values(basket).reduce((a,b)=>a+b,0);
+        document.getElementById("barCount").innerText=`${count} Articoli`;
     }
 
-    function toggleModal(id) {
-        const el = document.getElementById(id);
-        if (el.style.display === "block") el.style.display = "none";
-        else {
-            if(id === 'basketModal') renderBasketList();
-            el.style.display = "block";
-        }
+    function toggleModal(id){
+        const el=document.getElementById(id);
+        if(el.style.display==="block") el.style.display="none";
+        else{ if(id==='basketModal') renderBasketList(); el.style.display="block"; }
     }
 
-    function toggleBreakdown(key) {
-        const el = document.getElementById('bd-' + key);
-        const btn = document.getElementById('btn-' + key);
-        if(el.style.display === 'none') {
-            el.style.display = 'block';
-            btn.innerText = '⬆ Chiudi dettagli';
-        } else {
-            el.style.display = 'none';
-            btn.innerText = '⬇ Vedi dettaglio spesa';
-        }
+    function toggleBreakdown(key){
+        const el=document.getElementById('bd-'+key);
+        const btn=document.getElementById('btn-'+key);
+        if(!el) return;
+        if(el.style.display==='none'){ el.style.display='block'; if(btn) btn.innerText='⬆ Chiudi dettagli'; }
+        else { el.style.display='none'; if(btn) btn.innerText='⬇ Vedi dettaglio spesa'; }
     }
 
-    function renderBasketList() {
-        const container = document.getElementById("basketListContainer");
-        container.innerHTML = "";
-        if(Object.keys(basket).length === 0) {
-            container.innerHTML = "<p style='text-align:center; color:#999; margin-top:30px'>Il carrello è vuoto.</p>";
+    function renderBasketList(){
+        const container=document.getElementById("basketListContainer");
+        container.innerHTML="";
+        if(Object.keys(basket).length===0){
+            container.innerHTML="<p style='text-align:center;color:#999;margin-top:30px'>Il carrello è vuoto.</p>";
             return;
         }
-        Object.keys(basket).forEach(key => {
-            const p = products.find(x => x.id == key);
-            const qty = basket[key];
-            container.innerHTML += `
+        Object.keys(basket).forEach(key=>{
+            const p=products.find(x=>x.id==key);
+            const qty=basket[key];
+            container.innerHTML+=`
                 <div class="basket-item">
-                    <div style="display:flex; align-items:center;">
+                    <div style="display:flex;align-items:center;">
                         <div class="b-icon">${p.icon}</div>
                         <div>
-                            <div style="font-weight:600; font-size:0.9rem">${p.name}</div>
-                            <div style="font-size:0.8rem; color:#888">${p.size}</div>
+                            <div style="font-weight:600;font-size:0.9rem">${p.name}</div>
+                            <div style="font-size:0.8rem;color:#888">${p.size}</div>
                         </div>
                     </div>
                     <div class="b-qty-control">
                         <button class="b-btn b-minus" onclick="updateQty(${p.id}, -1)">−</button>
-                        <span style="font-weight:700; width:20px; text-align:center;">${qty}</span>
+                        <span style="font-weight:700;width:20px;text-align:center;">${qty}</span>
                         <button class="b-btn b-plus" onclick="updateQty(${p.id}, 1)">+</button>
                     </div>
                 </div>
@@ -900,199 +637,150 @@
         });
     }
 
-    function computeBestTotalWithinRadius(centerRadiusKm, extraKm) {
-        if (!userLocation) return null;
-        let best = null;
-        Object.keys(stores).forEach(key => {
-            const loc = storeLocations[key];
-            if (!loc) return;
-            const dist = distanceKm(userLocation.lat, userLocation.lon, loc.lat, loc.lon);
-            if (dist > centerRadiusKm + extraKm) return;
-
-            let total = 0;
-            Object.keys(basket).forEach(itemId => {
-                const p = products.find(x => x.id == itemId);
-                const qty = basket[itemId];
-                const availMap = p.availability || {};
-                const isAvailable = (key in availMap) ? !!availMap[key] : true;
-                if (isAvailable) {
-                    total += p.prices[key] * qty;
-                }
+    function computeBestTotalWithinRadius(centerRadiusKm, extraKm){
+        if(!userLocation) return null;
+        let best=null;
+        Object.keys(stores).forEach(key=>{
+            const loc=storeLocations[key]; if(!loc) return;
+            const dist=distanceKm(userLocation.lat, userLocation.lon, loc.lat, loc.lon);
+            if(dist>centerRadiusKm+extraKm) return;
+            let total=0;
+            Object.keys(basket).forEach(itemId=>{
+                const p=products.find(x=>x.id==itemId);
+                const qty=basket[itemId];
+                const availMap=p.availability||{};
+                const isAvailable=(key in availMap)?!!availMap[key]:true;
+                if(isAvailable) total+=p.prices[key]*qty;
             });
-            if (best === null || total < best.total) {
-                best = { storeKey: key, distKm: dist, total };
-            }
+            if(best===null||total<best.total) best={storeKey:key,distKm:dist,total};
         });
         return best;
     }
 
-    function runComparison() {
-        if (Object.keys(basket).length === 0) { alert("Il carrello è vuoto!"); return; }
-        if (!userLocation) { alert("Imposta prima una posizione (indirizzo)."); return; }
-        const radius = getRadiusKm();
-        if (isNaN(radius) || radius <= 0) { alert("Raggio km non valido."); return; }
+    function runComparison(){
+        if(Object.keys(basket).length===0){ alert("Il carrello è vuoto!"); return; }
+        if(!userLocation){ alert("Imposta prima una posizione (indirizzo)."); return; }
+        const radius=getRadiusKm();
+        if(isNaN(radius)||radius<=0){ alert("Raggio km non valido."); return; }
 
-        const resultsModal = document.getElementById("resultsModal");
-        const container = document.getElementById("resultsContainer");
-        container.innerHTML = "";
-        const savingsEl = document.getElementById("savingsSummary");
-        const sortMode = document.getElementById("sortMode").value;
-        const onlyComplete = document.getElementById("onlyComplete").checked;
+        const resultsModal=document.getElementById("resultsModal");
+        const container=document.getElementById("resultsContainer");
+        container.innerHTML="";
+        const savingsEl=document.getElementById("savingsSummary");
+        const sortMode=document.getElementById("sortMode").value;
+        const onlyComplete=document.getElementById("onlyComplete").checked;
+        const results=[];
 
-        const results = [];
+        Object.keys(stores).forEach(key=>{
+            const loc=storeLocations[key]; if(!loc) return;
+            const dist=distanceKm(userLocation.lat, userLocation.lon, loc.lat, loc.lon);
+            if(dist>radius) return;
 
-        Object.keys(stores).forEach(key => {
-            const loc = storeLocations[key];
-            if (!loc) return;
-            const dist = distanceKm(userLocation.lat, userLocation.lon, loc.lat, loc.lon);
-            if (dist > radius) return;
+            let total=0;
+            let breakdownHtml=`<div class="breakdown-list" id="bd-${key}" style="display:none;">`;
+            let missingHtml="";
+            const missingItems=[];
+            const groupedLines={};
+            const categoryOrder=["Ortofrutta","Carne","Pesce","Salumi/Formaggi","Gastronomia","Latticini","Panetteria","Surgelati","Dispensa","Snack/Dolci","Colazione","Bevande","Cura Casa","Cura Persona","Animali","Casalinghi"];
 
-            let total = 0;
-            let breakdownHtml = `<div class="breakdown-list" id="bd-${key}">`;
-            let missingHtml = "";
-            const missingItems = [];
+            Object.keys(basket).forEach(itemId=>{
+                const p=products.find(x=>x.id==itemId);
+                const qty=basket[itemId];
+                const availMap=p.availability||{};
+                const isAvailable=(key in availMap)?!!availMap[key]:true;
+                const cat=p.category||"Altro";
+                if(!groupedLines[cat]) groupedLines[cat]=[];
 
-            const groupedLines = {};
-            const categoryOrder = ["Ortofrutta","Carne","Pesce","Salumi/Formaggi","Gastronomia","Latticini","Panetteria","Surgelati","Dispensa","Snack/Dolci","Colazione","Bevande","Cura Casa","Cura Persona","Animali","Casalinghi"];
+                const ts=fakeTimestampForPrice(key,p.id);
+                const src=fakeSourceForStore(key);
 
-            Object.keys(basket).forEach(itemId => {
-                const p = products.find(x => x.id == itemId);
-                const qty = basket[itemId];
-                const availMap = p.availability || {};
-                const isAvailable = (key in availMap) ? !!availMap[key] : true;
-                const cat = p.category || "Altro";
-                if (!groupedLines[cat]) groupedLines[cat] = [];
-
-                // generate fake timestamp and source
-                const ts = fakeTimestampForPrice(key, p.id);
-                const src = fakeSourceForStore(key);
-
-                if (isAvailable) {
-                    const itemTotal = p.prices[key] * qty;
-                    total += itemTotal;
+                if(isAvailable){
+                    const itemTotal=p.prices[key]*qty; total+=itemTotal;
                     groupedLines[cat].push(`
                         <div style="padding:6px 0;">
-                            <div class="breakdown-row">
-                                <span>${qty}x ${p.name}</span>
-                                <span class="bd-price">€${itemTotal.toFixed(2)}</span>
-                            </div>
+                            <div class="breakdown-row"><span>${qty}x ${p.name}</span><span class="bd-price">€${itemTotal.toFixed(2)}</span></div>
                             <div class="meta-small">Aggiornato il: ${ts} · Fonte: <span class="source">${src}</span></div>
                         </div>
                     `);
                 } else {
                     missingItems.push(p);
-                    const line = `
+                    const line=`
                         <div style="padding:6px 0;">
-                            <div class="breakdown-row" style="color:#b91c1c;">
-                                <span>${qty}x ${p.name}</span>
-                                <span class="bd-price">NON DISP.</span>
-                            </div>
+                            <div class="breakdown-row" style="color:#b91c1c;"><span>${qty}x ${p.name}</span><span class="bd-price">NON DISP.</span></div>
                             <div class="meta-small" style="color:#b91c1c;">Aggiornato il: ${ts} · Fonte: <span class="source">${src}</span></div>
                         </div>
                     `;
                     groupedLines[cat].push(line);
-                    missingHtml += line;
+                    missingHtml+=line;
                 }
             });
 
-            if (onlyComplete && missingItems.length > 0) {
-                return;
-            }
+            if(onlyComplete && missingItems.length>0) return;
 
-            const cats = Object.keys(groupedLines).sort((a,b) => {
-                const ia = categoryOrder.indexOf(a);
-                const ib = categoryOrder.indexOf(b);
-                return (ia === -1 ? 999 : ia) - (ib === -1 ? 999 : ib);
+            const cats=Object.keys(groupedLines).sort((a,b)=>{
+                const ia=categoryOrder.indexOf(a), ib=categoryOrder.indexOf(b);
+                return (ia===-1?999:ia)-(ib===-1?999:ib);
             });
 
-            cats.forEach(cat => {
-                breakdownHtml += `
-                    <div style="font-size:0.8rem; font-weight:700; margin-top:6px; margin-bottom:2px;">
-                        ${cat}
-                    </div>
-                `;
-                groupedLines[cat].forEach(line => {
-                    breakdownHtml += line;
-                });
+            cats.forEach(cat=>{
+                breakdownHtml+=`<div style="font-size:0.8rem;font-weight:700;margin-top:6px;margin-bottom:2px;">${cat}</div>`;
+                groupedLines[cat].forEach(line=>breakdownHtml+=line);
             });
 
-            if (missingItems.length > 0) {
-                breakdownHtml += `
-                    <div style="margin-top:8px; padding-top:8px; border-top:1px dashed #fca5a5;">
-                        <div style="font-size:0.8rem; font-weight:700; color:#b91c1c; margin-bottom:4px;">
-                            ⚠ Prodotti non disponibili in questo supermercato:
-                        </div>
-                        ${missingHtml}
-                    </div>
-                `;
+            if(missingItems.length>0){
+                breakdownHtml+=`<div style="margin-top:8px;padding-top:8px;border-top:1px dashed #fca5a5;">
+                    <div style="font-size:0.8rem;font-weight:700;color:#b91c1c;margin-bottom:4px;">⚠ Prodotti non disponibili in questo supermercato:</div>
+                    ${missingHtml}
+                </div>`;
             }
 
-            breakdownHtml += `</div>`;
+            breakdownHtml+=`</div>`;
 
             results.push({
-                key,
-                meta: stores[key],
-                distKm: dist,
-                total,
-                missingCount: missingItems.length,
-                breakdown: breakdownHtml
+                key, meta:stores[key], distKm:dist, total, missingCount:missingItems.length, breakdown:breakdownHtml
             });
         });
 
-        if (results.length === 0) {
-            container.innerHTML = "<p style='padding:20px; text-align:center; color:#555'>Nessun supermercato entro il raggio selezionato.</p>";
-            savingsEl.innerText = "";
-            resultsModal.style.display = "block";
+        if(results.length===0){
+            container.innerHTML="<p style='padding:20px;text-align:center;color:#555'>Nessun supermercato entro il raggio selezionato.</p>";
+            savingsEl.innerText="";
+            resultsModal.style.display="block";
             return;
         }
 
-        results.sort((a,b) => {
-            if (sortMode === "distance") {
-                return a.distKm - b.distKm;
-            } else if (sortMode === "mixed") {
-                const scoreA = a.total + a.distKm * 0.8;
-                const scoreB = b.total + b.distKm * 0.8;
-                return scoreA - scoreB;
-            } else {
-                return a.total - b.total;
-            }
+        results.sort((a,b)=>{
+            if(sortMode==="distance") return a.distKm-b.distKm;
+            if(sortMode==="mixed"){ const scoreA=a.total+a.distKm*0.8, scoreB=b.total+b.distKm*0.8; return scoreA-scoreB; }
+            return a.total-b.total;
         });
 
-        const bestCurrent = results[0];
-        const bestWider = computeBestTotalWithinRadius(radius + 1, 0);
-        if (bestWider && bestWider.distKm > radius + 0.01 && bestWider.total + 0.01 < bestCurrent.total) {
-            const saved = (bestCurrent.total - bestWider.total).toFixed(2);
-            const newRadius = (radius + 1).toFixed(1);
-            const bestStoreName = stores[bestWider.storeKey].name;
-            savingsEl.innerText =
-                `Con un raggio di ${newRadius} km potresti includere ${bestStoreName} e risparmiare circa €${saved} sulla spesa.`;
+        const bestCurrent=results[0];
+        const bestWider=computeBestTotalWithinRadius(getRadiusKm()+1,0);
+        if(bestWider && bestWider.distKm>getRadiusKm()+0.01 && bestWider.total+0.01<bestCurrent.total){
+            const saved=(bestCurrent.total-bestWider.total).toFixed(2);
+            const newRadius=(getRadiusKm()+1).toFixed(1);
+            const bestStoreName=stores[bestWider.storeKey].name;
+            savingsEl.innerText=`Con un raggio di ${newRadius} km potresti includere ${bestStoreName} e risparmiare circa €${saved} sulla spesa.`;
         } else {
-            const bestTotal = bestCurrent.total.toFixed(2);
-            savingsEl.innerText = `Miglior totale nel raggio selezionato: €${bestTotal}.`;
+            const bestTotal=bestCurrent.total.toFixed(2);
+            savingsEl.innerText=`Miglior totale nel raggio selezionato: €${bestTotal}.`;
         }
 
-        results.forEach((res, idx) => {
-            const isBest = idx === 0;
-            const hasMissing = res.missingCount > 0;
-            const storeTs = fakeTimestampForStore(res.key);
-            const storeSrc = fakeSourceForStore(res.key);
-
-            container.innerHTML += `
-                <div class="result-card ${isBest ? 'best' : ''}">
-                    ${isBest ? `<div class="best-badge">🏆 MIGLIORE</div>` : ''}
+        results.forEach((res,idx)=>{
+            const isBest=idx===0;
+            const hasMissing=res.missingCount>0;
+            const storeTs=fakeTimestampForStore(res.key);
+            const storeSrc=fakeSourceForStore(res.key);
+            container.innerHTML+=`
+                <div class="result-card ${isBest?'best':''}">
+                    ${isBest?`<div class="best-badge">🏆 MIGLIORE</div>`:''}
                     <div class="store-row">
                         <div class="store-avatar ${res.meta.class}">${res.meta.short}</div>
-                        <div style="flex:1; min-width:0;">
-                            <h3 style="margin:0; font-size:1.1rem">${res.meta.name}</h3>
-                            <div style="font-size:0.85rem; color:#777">Distanza: ${res.distKm.toFixed(1)} km</div>
-                            <div style="font-size:0.8rem; color:#555; margin-top:6px;">
-                                Aggiornato il: ${storeTs} · Fonte: <span style="font-weight:700; color:#333;">${storeSrc}</span>
-                            </div>
-                            ${hasMissing ? `
-                                <div style="font-size:0.8rem; color:#b91c1c; margin-top:8px;">
-                                    ❗ Alcuni prodotti del carrello non sono disponibili in questo supermercato
-                                </div>
-                            ` : ""}
+                        <div style="flex:1;min-width:0;">
+                            <h3 style="margin:0;font-size:1.1rem">${res.meta.name}</h3>
+                            <div style="font-size:0.85rem;color:#777">Distanza: ${res.distKm.toFixed(1)} km</div>
+                            <div style="font-size:0.8rem;color:#555;margin-top:6px;">Aggiornato il: ${storeTs} · Fonte: <span style="font-weight:700;color:#333">${storeSrc}</span></div>
+                            ${hasMissing?`<div style="font-size:0.8rem;color:#b91c1c;margin-top:8px;">❗ Alcuni prodotti del carrello non sono disponibili in questo supermercato</div>`:''}
                         </div>
                     </div>
                     <div class="total">€${res.total.toFixed(2)}</div>
@@ -1102,18 +790,18 @@
             `;
         });
 
-        resultsModal.style.display = "block";
+        resultsModal.style.display="block";
     }
 
-    document.getElementById("sortMode").addEventListener("change", () => {
-        if (document.getElementById("resultsModal").style.display === "block") runComparison();
+    document.getElementById("sortMode").addEventListener("change",()=>{
+        if(document.getElementById("resultsModal").style.display==="block") runComparison();
     });
-    document.getElementById("onlyComplete").addEventListener("change", () => {
-        if (document.getElementById("resultsModal").style.display === "block") runComparison();
+    document.getElementById("onlyComplete").addEventListener("change",()=>{
+        if(document.getElementById("resultsModal").style.display==="block") runComparison();
     });
 
-    document.getElementById("searchInput").addEventListener("input", renderProducts);
-    document.getElementById("typeFilter").addEventListener("change", renderProducts);
+    document.getElementById("searchInput").addEventListener("input",renderProducts);
+    document.getElementById("typeFilter").addEventListener("change",renderProducts);
     renderProducts();
 </script>
 </body>
