@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Basketly - Confronto Dettagliato (Geo)</title>
+    <title>Basketly - Risparmia sulla tua spesa con un click</title>
     <style>
         :root{
             --primary-color:#27ae60;
@@ -25,6 +25,7 @@
             margin:0;
             color:var(--text-color);
             padding-bottom:calc(120px + env(safe-area-inset-bottom));
+            -webkit-font-smoothing:antialiased;
         }
 
         header{
@@ -74,7 +75,7 @@
         .btn-minus{display:none;width:38px;background:#fee2e2;color:var(--danger-color);border:none;border-radius:10px;font-weight:800;font-size:1.2rem;cursor:pointer;align-items:center;justify-content:center}
         .product-card[data-added="true"] .btn-minus{display:flex}
 
-        /* -------------------- BOTTOM BAR (adjusted) -------------------- */
+        /* -------------------- BOTTOM BAR (collapse-enabled) -------------------- */
         .bottom-bar{
             position:fixed;
             left:0;right:0;bottom:0;
@@ -86,11 +87,8 @@
             border-top:1px solid #eee;
             box-shadow:0 -6px 18px rgba(0,0,0,0.08);
             padding:10px 14px;
-            /* slightly reduced height from previous "too big" version */
             height:auto;
             min-height:54px;
-            /* keep controls flexible */
-            flex-wrap:nowrap;
         }
 
         .basket-summary{
@@ -109,6 +107,7 @@
             flex:1 1 auto;
             justify-content:flex-end;
             flex-wrap:nowrap;
+            transition:all .18s ease;
         }
 
         /* compact pill for ordering */
@@ -130,19 +129,25 @@
         .pill-btn .pill-text{display:inline-block}
         .pill-btn select{border:none;background:transparent;font-size:0.85rem;outline:none;cursor:pointer}
 
-        .toggle-complete{display:inline-flex;align-items:center;gap:6px;background:#f1f3f4;border-radius:999px;padding:6px 10px;font-size:0.78rem;flex:0 0 auto}
-        .toggle-switch{position:relative;width:30px;height:16px;background:#d1d5db;border-radius:999px;cursor:pointer}
-        .toggle-switch input{opacity:0;width:0;height:0}
-        .toggle-knob{position:absolute;top:2px;left:2px;width:12px;height:12px;border-radius:50%;background:white;transition:0.2s}
-        .toggle-switch input:checked + .toggle-knob{transform:translateX(12px)}
+        .toggle-complete{display:inline-flex;align-items:center;gap:6px;background:#f1f3f4;border-radius:999px;padding:6px 10px;font-size:0.78rem;flex:0 0 auto;cursor:pointer;transition:background .15s,color .15s}
+        .toggle-complete .label-text { font-weight:600; font-size:0.78rem; color: #333; }
+        .toggle-complete .toggle-switch{position:relative;width:34px;height:18px;background:#d1d5db;border-radius:999px;cursor:pointer}
+        .toggle-complete .toggle-switch input{opacity:0;width:0;height:0}
+        .toggle-complete .toggle-knob{position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:white;transition:transform .18s}
+        .toggle-complete .toggle-switch input:checked + .toggle-knob{transform:translateX(16px)}
 
-        /* compare button reduced size / less tall */
+        /* active state set by JS when checkbox toggled */
+        .toggle-complete.active{background:var(--primary-color); color:white}
+        .toggle-complete.active .label-text{color:white}
+        .toggle-complete.active .toggle-knob{background:white}
+
+        /* compare button reduced size / balanced */
         .compare-btn{
             background:var(--primary-color);
             color:white;
             border:none;
-            padding:10px 16px; /* smaller padding */
-            border-radius:16px; /* smaller radius than before */
+            padding:10px 16px;
+            border-radius:16px;
             font-weight:700;
             font-size:0.95rem;
             box-shadow:0 6px 14px rgba(39,174,96,0.25);
@@ -152,6 +157,34 @@
             min-width:120px;
             max-width:220px;
             text-align:center;
+            transition:all .16s ease;
+        }
+
+        /* collapse toggle small */
+        .collapse-toggle{
+            background:transparent;
+            border:none;
+            cursor:pointer;
+            padding:6px;
+            border-radius:8px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            color:#555;
+            flex:0 0 auto;
+        }
+        .collapse-toggle .chev{transition:transform .18s}
+        .bottom-bar.collapsed .collapse-toggle .chev{transform:rotate(180deg)}
+
+        /* when collapsed, hide pill & toggle and expand compare button a bit */
+        .bottom-bar.collapsed .bottom-controls .pill-btn,
+        .bottom-bar.collapsed .bottom-controls .toggle-complete {
+            display:none;
+        }
+        .bottom-bar.collapsed .compare-btn {
+            min-width:140px;
+            flex:1 1 auto;
+            border-radius:12px;
         }
 
         /* Modals and other components */
@@ -192,7 +225,6 @@
 
         /* ---------------------- RESPONSIVE ADJUSTMENTS ---------------------- */
         @media (max-width:720px){
-            /* ensure grid doesn't get hidden behind bar - tuned to be smaller than before */
             .product-grid{padding-bottom:180px}
             .bottom-bar{
                 padding:8px 12px;
@@ -211,37 +243,30 @@
             .basket-count{font-size:0.95rem}
             .basket-link{font-size:0.76rem}
 
-            /* compress pill btn text on very small widths so controls take less space */
             .pill-btn{padding:6px 8px;min-width:70px}
             .pill-btn .pill-text{display:inline-block}
-            .pill-btn .pill-icon{font-size:0.95rem}
-
             .toggle-complete{padding:6px 8px;font-size:0.72rem}
 
-            /* compare button becomes shorter and more compact */
             .compare-btn{
                 min-width:110px;
                 padding:9px 12px;
                 border-radius:14px;
                 font-size:0.95rem;
-                box-shadow:0 6px 12px rgba(39,174,96,0.22);
             }
 
-            /* allow bottom-controls to wrap but keep compare button visible on a second line if needed */
             .bottom-controls{flex-wrap:wrap;justify-content:flex-end}
         }
 
-        /* very narrow phones: hide pill text to give more room and keep compare button accessible */
+        /* very narrow phones: hide pill text to give more room */
         @media (max-width:420px){
             .product-grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;padding:14px;padding-bottom:200px}
-            .pill-btn .pill-text{display:none} /* collapse "Ordina" text to just icon */
+            .pill-btn .pill-text{display:none}
             .pill-btn{padding:6px;min-width:44px}
             .compare-btn{min-width:100px;padding:10px 12px;font-size:0.94rem}
             .basket-count{font-size:0.95rem}
         }
 
         @media (min-width:721px){
-            /* desktop: keep a slightly larger bottom bar but not huge */
             .bottom-bar{padding:10px 18px;min-height:56px}
             .product-grid{padding-bottom:120px}
         }
@@ -284,7 +309,7 @@
 <div class="product-grid" id="productGrid"></div>
 
 <!-- bottom bar -->
-<div class="bottom-bar" role="navigation" aria-label="Barra inferiore">
+<div class="bottom-bar" role="navigation" aria-label="Barra inferiore" id="bottomBar">
     <div class="basket-summary">
         <span class="basket-count" id="barCount">0 Articoli</span>
         <span class="basket-link" onclick="toggleModal('basketModal')">Apri/Modifica Carrello</span>
@@ -301,15 +326,22 @@
             </select>
         </button>
 
-        <label class="toggle-complete" title="Mostra solo supermercati con tutti i prodotti">
-            <span style="font-size:0.75rem;">Solo completi</span>
-            <div class="toggle-switch">
-                <input type="checkbox" id="onlyComplete" aria-label="Solo completi">
+        <label class="toggle-complete" id="toggleCompleteLabel" title="Mostra solo carrelli completi">
+            <span class="label-text">Mostra solo carrelli completi</span>
+            <div class="toggle-switch" style="margin-left:8px;">
+                <input type="checkbox" id="onlyComplete" aria-label="Mostra solo carrelli completi">
                 <div class="toggle-knob"></div>
             </div>
         </label>
 
         <button class="compare-btn" onclick="runComparison()" id="compareBtn">Confronta ⚡</button>
+
+        <!-- collapse control -->
+        <button class="collapse-toggle" id="collapseToggle" aria-label="Espandi/Nascondi opzioni" title="Mostra/Nascondi opzioni">
+            <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
+                <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </button>
     </div>
 </div>
 
@@ -793,15 +825,37 @@
         resultsModal.style.display="block";
     }
 
-    document.getElementById("sortMode").addEventListener("change",()=>{
-        if(document.getElementById("resultsModal").style.display==="block") runComparison();
-    });
-    document.getElementById("onlyComplete").addEventListener("change",()=>{
-        if(document.getElementById("resultsModal").style.display==="block") runComparison();
+    // UI bindings: collapse toggle & 'Mostra solo carrelli completi' active styling
+    const collapseToggle = document.getElementById('collapseToggle');
+    const bottomBar = document.getElementById('bottomBar');
+    const onlyCompleteCheckbox = document.getElementById('onlyComplete');
+    const toggleCompleteLabel = document.getElementById('toggleCompleteLabel');
+
+    collapseToggle.addEventListener('click', () => {
+        bottomBar.classList.toggle('collapsed');
+        // ensure compare button remains first-class focusable
+        document.getElementById('compareBtn').focus();
     });
 
-    document.getElementById("searchInput").addEventListener("input",renderProducts);
-    document.getElementById("typeFilter").addEventListener("change",renderProducts);
+    // init label active state and toggle on change
+    function updateToggleCompleteVisual() {
+        if (onlyCompleteCheckbox.checked) toggleCompleteLabel.classList.add('active');
+        else toggleCompleteLabel.classList.remove('active');
+        // If results modal is open, re-run to reflect filter
+        if (document.getElementById("resultsModal").style.display === "block") runComparison();
+    }
+    onlyCompleteCheckbox.addEventListener('change', updateToggleCompleteVisual);
+    // set initial visual state
+    updateToggleCompleteVisual();
+
+    // Keep previous listeners working
+    document.getElementById("sortMode").addEventListener("change", () => {
+        if (document.getElementById("resultsModal").style.display === "block") runComparison();
+    });
+
+    document.getElementById("searchInput").addEventListener("input", renderProducts);
+    document.getElementById("typeFilter").addEventListener("change", renderProducts);
+
     renderProducts();
 </script>
 </body>
