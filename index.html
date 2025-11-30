@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Basketly - Confronto Dettagliato (Geo)</title>
+    <title>Basketly - Risparmia sulla tua spesa con un click</title>
     <style>
         :root {
             --primary-color: #27ae60;
@@ -17,12 +17,14 @@
             --tigros: #0066cc;
             --conad: #da291c;
         }
+        /* Base layout */
+        html,body { height:100%; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background-color: var(--bg-color);
             margin: 0;
             color: var(--text-color);
-            padding-bottom: 120px;
+            padding-bottom: calc(120px + env(safe-area-inset-bottom)); /* leave space for bottom controls and phone UI */
         }
         header {
             background: white;
@@ -34,6 +36,8 @@
             border-bottom-left-radius: 20px;
             border-bottom-right-radius: 20px;
         }
+
+        /* ... existing styles unchanged (shortened for readability here in the editor) ... */
         .header-top {
             display: flex;
             justify-content: space-between;
@@ -190,23 +194,27 @@
         }
         .product-card[data-added="true"] .btn-minus { display: flex; }
 
+        /* Bottom bar - responsive improvements */
         .bottom-bar {
             position: fixed;
             bottom: 0; left: 0; right: 0;
             background: white;
             padding: 10px 16px;
-            box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.12);
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            z-index: 900;
-            border-top: 1px solid #eee;
             gap: 10px;
+            align-items: center;
+            z-index: 1200;
+            border-top: 1px solid #eee;
+            flex-wrap: nowrap; /* will change via media query */
+            /* reserve additional space for mobile safe area */
+            padding-bottom: calc(10px + env(safe-area-inset-bottom));
         }
         .basket-summary {
             display: flex;
             flex-direction: column;
-            min-width: 120px;
+            min-width: 140px;
+            flex: 0 0 auto;
         }
         .basket-count { font-weight: 800; font-size: 1.1rem; }
         .basket-link { font-size: 0.8rem; text-decoration: underline; cursor: pointer; color: #555; }
@@ -215,8 +223,9 @@
             display: flex;
             align-items: center;
             gap: 8px;
-            flex: 1;
+            flex: 1 1 auto;
             justify-content: flex-end;
+            flex-wrap: nowrap;
         }
         .pill-btn {
             display: inline-flex;
@@ -229,6 +238,8 @@
             border: none;
             cursor: pointer;
             color: #333;
+            flex: 0 1 auto;
+            min-width: 90px;
         }
         .pill-btn select {
             border: none;
@@ -248,6 +259,7 @@
             border-radius: 999px;
             padding: 4px 8px;
             font-size: 0.75rem;
+            flex: 0 1 auto;
         }
         .toggle-switch {
             position: relative;
@@ -287,8 +299,11 @@
             box-shadow: 0 4px 15px rgba(39, 174, 96, 0.4);
             cursor: pointer;
             white-space: nowrap;
+            flex: 0 0 auto;
+            min-width: 140px; /* keep tappable */
         }
 
+        /* Modals and other components */
         .modal {
             display: none;
             position: fixed;
@@ -391,6 +406,64 @@
             font-weight: 700;
             color: #333;
         }
+
+        /* ---------------------- RESPONSIVE RULES ---------------------- */
+        /* Improve bottom bar layout on small screens */
+        @media (max-width: 720px) {
+            .product-grid { padding-bottom: 220px; } /* ensure grid not hidden under bottom bar */
+            .bottom-bar {
+                flex-wrap: wrap;
+                align-items: center;
+                padding: 10px 12px calc(12px + env(safe-area-inset-bottom));
+                gap: 8px;
+            }
+            .basket-summary {
+                order: 1;
+                width: 100%;
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                justify-content: space-between;
+                padding-right: 8px;
+            }
+            .basket-count { font-size: 1rem; }
+            .basket-link { font-size: 0.8rem; }
+            .bottom-controls {
+                order: 2;
+                width: 100%;
+                justify-content: space-between;
+                gap: 8px;
+            }
+            .pill-btn, .toggle-complete {
+                flex: 1 1 auto;
+                min-width: 0;
+            }
+            .compare-btn {
+                order: 3;
+                width: 100%;
+                min-width: 0;
+                padding: 12px;
+                border-radius: 14px;
+                font-size: 1rem;
+            }
+            /* make toggle button and selects more compact */
+            .pill-btn select { font-size: 0.85rem; }
+        }
+
+        /* Slight adjustments for very narrow phones */
+        @media (max-width: 420px) {
+            .product-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap:12px; padding: 14px; padding-bottom: 260px; }
+            .compare-btn { font-size: 0.95rem; padding: 12px; }
+            .search-box input { padding: 12px 12px 12px 40px; }
+        }
+
+        /* Desktop - ensure components align nicely */
+        @media (min-width: 721px) {
+            .bottom-bar { flex-wrap: nowrap; padding-bottom: 10px; }
+            .basket-summary { min-width: 160px; }
+            .bottom-controls { justify-content: flex-end; }
+            .compare-btn { min-width: 140px; }
+        }
     </style>
 </head>
 <body>
@@ -431,29 +504,32 @@
 
 <div class="product-grid" id="productGrid"></div>
 
-<div class="bottom-bar">
+<div class="bottom-bar" role="navigation" aria-label="Barra inferiore">
     <div class="basket-summary">
         <span class="basket-count" id="barCount">0 Articoli</span>
         <span class="basket-link" onclick="toggleModal('basketModal')">Apri/Modifica Carrello</span>
     </div>
-    <div class="bottom-controls">
-        <button class="pill-btn" type="button">
+
+    <div class="bottom-controls" id="bottomControls">
+        <button class="pill-btn" type="button" aria-label="Ordina e opzioni">
             <span class="pill-icon">↕️</span>
             <span>Ordina</span>
-            <select id="sortMode">
+            <select id="sortMode" aria-label="Modalità di ordinamento">
                 <option value="price">Prezzo</option>
                 <option value="distance">Distanza</option>
                 <option value="mixed">Mix € / km</option>
             </select>
         </button>
-        <label class="toggle-complete">
+
+        <label class="toggle-complete" title="Mostra solo supermercati con tutti i prodotti">
             <span style="font-size:0.75rem;">Solo completi</span>
             <div class="toggle-switch">
-                <input type="checkbox" id="onlyComplete">
+                <input type="checkbox" id="onlyComplete" aria-label="Solo completi">
                 <div class="toggle-knob"></div>
             </div>
         </label>
-        <button class="compare-btn" onclick="runComparison()">Confronta ⚡</button>
+
+        <button class="compare-btn" onclick="runComparison()" id="compareBtn">Confronta ⚡</button>
     </div>
 </div>
 
@@ -461,7 +537,7 @@
     <div class="modal-card">
         <div class="modal-header">
             <h2 style="margin:0">Il tuo Carrello</h2>
-            <button class="close-icon" onclick="toggleModal('basketModal')">✕</button>
+            <button class="close-icon" onclick="toggleModal('basketModal')" aria-label="Chiudi">✕</button>
         </div>
         <div class="basket-list" id="basketListContainer"></div>
     </div>
@@ -659,22 +735,21 @@
     // base date for a store (varies deterministically by store key)
     function getStoreBaseDate(storeKey) {
         const now = new Date();
-        // deterministically offset minutes per store so timestamps vary but are consistent during a session
         let seed = 0;
         for (let i = 0; i < storeKey.length; i++) seed += storeKey.charCodeAt(i);
         const minutesOffset = (seed % 180); // up to 3 hours difference
         return new Date(now.getTime() - minutesOffset * 60 * 1000);
     }
 
-    // timestamp for a specific product in a store (adds small deterministic offset by productId)
+    // timestamp for a specific product in a store
     function fakeTimestampForPrice(storeKey, productId) {
         const base = getStoreBaseDate(storeKey);
-        const extra = productId % 45; // up to 44 minutes extra difference between items
+        const extra = productId % 45; // small deterministic offset
         const d = new Date(base.getTime() - extra * 60 * 1000);
         return formatFriendlyTimestamp(d);
     }
 
-    // friendly formatting: if same day -> "oggi – ore HH:MM", else "DD/MM – ore HH:MM"
+    // friendly formatting: "oggi – ore HH:MM" or "DD/MM – ore HH:MM"
     function formatFriendlyTimestamp(d) {
         const now = new Date();
         const sameDay = d.getDate() === now.getDate() && d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
@@ -694,7 +769,6 @@
     }
 
     function fakeSourceForStore(storeKey) {
-        // Explicitly mark as demo / fake source to be transparent
         return `Volantino ${stores[storeKey].name} (demo)`;
     }
     // --- end helpers ---
@@ -1000,7 +1074,6 @@
         results.forEach((res, idx) => {
             const isBest = idx === 0;
             const hasMissing = res.missingCount > 0;
-            // store-level fake timestamp and source
             const storeTs = fakeTimestampForStore(res.key);
             const storeSrc = fakeSourceForStore(res.key);
 
