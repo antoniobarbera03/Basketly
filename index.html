@@ -59,6 +59,24 @@
         }
         .filter-box select{padding:10px 12px;border-radius:14px;border:2px solid #eee;background:#f9f9f9;font-size:0.9rem;outline:none;min-width:150px}
 
+        /* max savings box (used in results modal now) */
+        .max-savings-box{
+            margin-top:8px;
+            background: linear-gradient(90deg, rgba(39,174,96,0.08), rgba(39,174,96,0.03));
+            border:1px solid rgba(39,174,96,0.12);
+            padding:10px 14px;
+            border-radius:12px;
+            display:flex;
+            align-items:center;
+            gap:12px;
+            color:var(--primary-color);
+            font-weight:700;
+            font-size:0.96rem;
+            box-shadow:0 6px 18px rgba(39,174,96,0.06);
+        }
+        .max-savings-box .ms-value{font-size:1.1rem;color:var(--primary-color);font-weight:900}
+        .max-savings-box .ms-detail{font-size:0.85rem;color:#4b5563;font-weight:600}
+
         /* product grid */
         .product-grid{
             display:grid;
@@ -286,6 +304,8 @@
             </select>
         </div>
     </div>
+
+    <!-- Nota: il box di risparmio è stato rimosso dall'header e sarà mostrato nella pagina di confronto (modal) -->
 </header>
 
 <div class="product-grid" id="productGrid"></div>
@@ -364,13 +384,22 @@
 
 <div class="modal" id="resultsModal">
     <div class="modal-card">
-        <div class="modal-header">
-            <div style="flex:1; min-width:0;">
-                <h2 style="margin:0">Migliori Prezzi</h2>
-                <div id="savingsSummary" style="font-size:0.8rem;color:#555;margin-top:4px"></div>
+        <div class="modal-header" style="flex-direction:column;align-items:flex-start;gap:8px;">
+            <div style="width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;">
+                <div style="flex:1; min-width:0;">
+                    <h2 style="margin:0">Migliori Prezzi</h2>
+                    <div id="savingsSummary" style="font-size:0.8rem;color:#555;margin-top:4px"></div>
+                </div>
+                <button class="close-icon" onclick="toggleModal('resultsModal')" aria-label="Chiudi">✕</button>
             </div>
-            <button class="close-icon" onclick="toggleModal('resultsModal')">✕</button>
+
+            <!-- Il box di risparmio è ora qui, nella pagina di confronto (modal) -->
+            <div id="maxSavingsBox" class="max-savings-box" aria-live="polite" style="display:none; width:100%;">
+                <div class="ms-value" id="msValue">€0.00</div>
+                <div class="ms-detail" id="msDetail">Esempio di risparmio potenziale</div>
+            </div>
         </div>
+
         <div id="resultsContainer" style="padding-bottom:40px"></div>
     </div>
 </div>
@@ -576,11 +605,13 @@
             const q=encodeURIComponent(addr+", Milano, Italia");
             const url=`https://nominatim.openstreetmap.org/search?q=${q}&format=json&limit=1`;
             const resp=await fetch(url,{headers:{"Accept":"application/json"}}); const data=await resp.json();
-            if(!data||data.length===0){statusEl.innerText="Indirizzo non trovato.";return;}
+            if(!data||data.length===0){statusEl.innerText="Indirizzo non trovato."; return;}
             const loc=data[0];
             userLocation={lat:parseFloat(loc.lat),lon:parseFloat(loc.lon)};
             document.getElementById("geoLabel").innerText=`Posizione impostata: ${addr}`;
             statusEl.innerText=`Coordinate: ${userLocation.lat.toFixed(5)}, ${userLocation.lon.toFixed(5)} (raggio ${radius.toFixed(1)} km)`;
+            // clear previous max savings until user triggers a new comparison
+            updateMaxSavingsBox(null);
         }catch(e){console.error(e);statusEl.innerText="Errore durante la geocodifica."}
     }
 
@@ -625,6 +656,8 @@
         if(basket[id]<=0) delete basket[id];
         renderProducts();
         renderBasketList();
+        // clear max savings box when basket changes (user should re-run confronto)
+        updateMaxSavingsBox(null);
     }
 
     function updateSummary(){
@@ -675,37 +708,107 @@
         });
     }
 
-    function computeBestTotalWithinRadius(centerRadiusKm, extraKm){
+    /**
+     * computeBestTotalWithinRadius(centerRadiusKm, extraKm, requireComplete)
+     * - requireComplete: se true, ignora (non considera) supermercati che non hanno TUTTI gli articoli del carrello disponibili
+     * Restituisce { storeKey, distKm, total, missingCount } o null se nessuno applicabile.
+     */
+    function computeBestTotalWithinRadius(centerRadiusKm, extraKm, requireComplete = false){
         if(!userLocation) return null;
-        let best=null;
+        let best = null;
         Object.keys(stores).forEach(key=>{
-            const loc=storeLocations[key]; if(!loc) return;
-            const dist=distanceKm(userLocation.lat, userLocation.lon, loc.lat, loc.lon);
-            if(dist>centerRadiusKm+ (extraKm || 0)) return;
-            let total=0;
+            const loc = storeLocations[key]; if(!loc) return;
+            const dist = distanceKm(userLocation.lat, userLocation.lon, loc.lat, loc.lon);
+            if(dist > centerRadiusKm + (extraKm || 0)) return;
+
+            let total = 0;
+            let missingCount = 0;
             Object.keys(basket).forEach(itemId=>{
-                const p=products.find(x=>x.id==itemId);
-                const qty=basket[itemId];
-                const availMap=p.availability||{};
-                const isAvailable=(key in availMap)?!!availMap[key]:true;
-                if(isAvailable) total+= (p.prices && p.prices[key]? p.prices[key]*qty : 0);
+                const p = products.find(x => x.id == itemId);
+                const qty = basket[itemId];
+                const availMap = p.availability || {};
+                const isAvailable = (key in availMap) ? !!availMap[key] : true;
+                if(isAvailable){
+                    total += (p.prices && p.prices[key] ? p.prices[key] * qty : 0);
+                } else {
+                    missingCount += qty; // conteggiamo quantità mancanti
+                }
             });
-            if(best===null||total<best.total) best={storeKey:key,distKm:dist,total};
+
+            if(requireComplete && missingCount > 0) return; // skip this store if incomplete and we require completeness
+
+            // choose best by minimal total, but if equal prefer closer?
+            if(best === null || total < best.total || (Math.abs(total - best.total) < 1e-6 && dist < best.distKm)){
+                best = { storeKey: key, distKm: dist, total, missingCount };
+            }
         });
         return best;
     }
 
-    // Find minimal increase (up to maxIncrease) that yields a cheaper total than currentBestTotal
-    function findMinimalIncreaseSaving(currentBestTotal, step=0.5, maxIncrease=5){
+    /**
+     * findMinimalIncreaseSaving(currentBestTotal, step=0.5, maxIncrease=5, requireComplete=false)
+     * - cerca il minimo incremento di raggio che porta ad un candidato con total < currentBestTotal
+     * - passa requireComplete a computeBestTotalWithinRadius in modo da rispettare il filtro "carrelli completi"
+     */
+    function findMinimalIncreaseSaving(currentBestTotal, step = 0.5, maxIncrease = 5, requireComplete = false){
         const baseRadius = getRadiusKm();
-        for(let inc=step; inc<=maxIncrease+1e-9; inc+=step){
-            const cand = computeBestTotalWithinRadius(baseRadius + inc, 0);
+        for(let inc = step; inc <= maxIncrease + 1e-9; inc += step){
+            const cand = computeBestTotalWithinRadius(baseRadius + inc, 0, requireComplete);
             if(cand && (cand.total + 0.01) < currentBestTotal){
-                // return the required increase and candidate
-                return {increase: parseFloat(inc.toFixed(3)), candidate: cand};
+                return { increase: parseFloat(inc.toFixed(3)), candidate: cand };
             }
         }
         return null;
+    }
+
+    // Update the savings box inside the results modal
+    function updateMaxSavingsBox(results){
+        const box = document.getElementById('maxSavingsBox');
+        const valEl = document.getElementById('msValue');
+        const detailEl = document.getElementById('msDetail');
+
+        if(!box || !valEl || !detailEl){
+            return;
+        }
+
+        // leggi stato "onlyComplete" correntemente selezionato (sincronizza inline e overlay)
+        const onlyComplete = (document.getElementById('onlyComplete')?.checked || document.getElementById('onlyCompleteOverlay')?.checked);
+
+        if(!results || !Array.isArray(results) || results.length === 0){
+            box.style.display = 'none';
+            valEl.innerText = '€0.00';
+            detailEl.innerText = '';
+            return;
+        }
+
+        // se richiesto, filtra i risultati per escludere supermarket non completi
+        const filtered = onlyComplete ? results.filter(r => (r.missingCount || 0) === 0) : results.slice();
+
+        if(filtered.length === 0){
+            // nessun supermercato completo tra i risultati — nascondi il box
+            box.style.display = 'none';
+            valEl.innerText = '€0.00';
+            detailEl.innerText = '';
+            return;
+        }
+
+        const best = filtered.reduce((acc, r) => (acc === null || r.total < acc.total) ? r : acc, null);
+        const worst = filtered.reduce((acc, r) => (acc === null || r.total > acc.total) ? r : acc, null);
+
+        if(!best || !worst){
+            box.style.display = 'none';
+            return;
+        }
+
+        const diff = worst.total - best.total;
+        if(diff <= 0.005){
+            box.style.display = 'none';
+            return;
+        }
+
+        box.style.display = 'flex';
+        valEl.innerText = `€${diff.toFixed(2)}`;
+        detailEl.innerText = `Risparmio massimo (tra supermercati ${onlyComplete ? 'completi' : 'tutti'}): passando da ${worst.meta.name} (€${worst.total.toFixed(2)}) a ${best.meta.name} (€${best.total.toFixed(2)})`;
     }
 
     function runComparison(){
@@ -796,6 +899,7 @@
         if(results.length===0){
             container.innerHTML="<p style='padding:20px;text-align:center;color:#555'>Nessun supermercato entro il raggio selezionato.</p>";
             savingsEl.innerText="";
+            updateMaxSavingsBox(null);
             resultsModal.style.display="block";
             return;
         }
@@ -809,7 +913,7 @@
         const bestCurrent=results[0];
 
         // Try to find the minimal radius increase (up to 5 km) that yields a cheaper total
-        const found = findMinimalIncreaseSaving(bestCurrent.total, 0.5, 5);
+        const found = findMinimalIncreaseSaving(bestCurrent.total, 0.5, 5, onlyComplete);
 
         if(found){
             const inc = found.increase;
@@ -821,6 +925,9 @@
             const bestTotal=bestCurrent.total.toFixed(2);
             savingsEl.innerText=`Miglior totale nel raggio selezionato: €${bestTotal}.`;
         }
+
+        // aggiorna il box superiore DELLA PAGINA DI CONFRONTO (modal), tenendo conto di onlyComplete
+        updateMaxSavingsBox(results);
 
         results.forEach((res,idx)=>{
             const isBest=idx===0;
@@ -903,7 +1010,7 @@
         if (lbl2) {
             if (document.getElementById('onlyCompleteOverlay').checked) lbl2.classList.add('active'); else lbl2.classList.remove('active');
         }
-        // re-run comparison if modal open
+        // re-run comparison if modal open (this will update the box and results respecting the new onlyComplete flag)
         if (document.getElementById("resultsModal").style.display === "block") runComparison();
     }
 
