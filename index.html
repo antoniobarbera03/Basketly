@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Basketly - Risparmia sulla tua spesa con un click</title>
     <style>
+        /* ensure consistent sizing to avoid overflow / overlap */
+        *, *::before, *::after { box-sizing: border-box; }
+
         :root{
             --primary-color:#27ae60;
             --bg-color:#f3f4f6;
@@ -42,22 +45,26 @@
         .header-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
         .logo{font-weight:900;font-size:1.6rem;color:var(--primary-color);letter-spacing:-1px}
         .logo span{color:#2c3e50}
-        .location-badge{background:#f1f3f4;padding:8px 12px;border-radius:12px;font-size:0.9rem;font-weight:600;display:flex;align-items:center;gap:5px}
+        .location-badge{background:#f1f3f4;padding:8px 12px;border-radius:12px;font-size:0.9rem;font-weight:600;display:flex;align-items:center;gap:5px;cursor:pointer}
+        .location-badge:focus{outline:2px solid rgba(39,174,96,0.2);}
 
         .geo-row{margin-top:8px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:0.85rem}
-        .geo-row input[type="text"]{padding:8px 10px;border-radius:10px;border:1px solid #ddd;font-size:0.85rem;min-width:220px}
+        .geo-row input[type="text"]{padding:8px 10px;border-radius:10px;border:1px solid #ddd;font-size:0.85rem;min-width:220px;flex:1 1 220px}
         .geo-btn{padding:8px 12px;border-radius:10px;border:none;background:var(--primary-color);color:white;font-size:0.8rem;font-weight:600;cursor:pointer}
         .geo-status{font-size:0.8rem;color:#555}
         .range-box{display:flex;align-items:center;gap:8px;background:#f1f3f4;padding:6px 10px;border-radius:999px}
         .range-box input[type="range"]{width:140px}
         .range-value{font-weight:600;font-size:0.85rem;min-width:55px;text-align:right}
-        .search-row{display:flex;gap:10px;margin-top:10px}
-        .search-box{flex:1;min-width:0}
+
+        /* SEARCH + FILTER layout: prevent overlap by using flex with min-width:0 and responsive stacking */
+        .search-row{display:flex;gap:10px;margin-top:10px;align-items:center;flex-wrap:nowrap}
+        .search-box{flex:1 1 auto;min-width:0} /* min-width:0 important so input can shrink inside flex */
         .search-box input{
-            width:100%;padding:14px 15px 14px 45px;border:2px solid #eee;border-radius:14px;font-size:1rem;outline:none;
-            background:#f9f9f9 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23999' viewBox='0 0 16 16'%3E%3Cpath d='M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z'/%3E%3C/svg%3E") no-repeat 15px center;box-sizing:border-box
+            width:100%;padding:14px 15px 14px 20px;border:2px solid #eee;border-radius:14px;font-size:1rem;outline:none;
+            background:#f9f9f9;
         }
-        .filter-box select{padding:10px 12px;border-radius:14px;border:2px solid #eee;background:#f9f9f9;font-size:0.9rem;outline:none;min-width:150px}
+        .filter-box{flex:0 0 160px;min-width:120px}
+        .filter-box select{padding:10px 12px;border-radius:14px;border:2px solid #eee;background:#f9f9f9;font-size:0.9rem;outline:none;width:100%}
 
         /* max savings box (used in results modal now) */
         .max-savings-box{
@@ -91,7 +98,7 @@
         .controls{display:flex;width:100%;gap:8px;margin-top:auto}
         .btn-main{flex-grow:1;background:var(--text-color);color:white;border:none;padding:10px 0;border-radius:10px;font-weight:600;font-size:0.85rem;cursor:pointer}
         .btn-main.added{background:var(--primary-color)}
-        .btn-minus{display:none;width:38px;background:#fee2e2;color:var(--danger-color);border:none;border-radius:10px;font-weight:800;font-size:1.2rem;cursor:pointer;align-items:center;justify-content:center}
+        .btn-minus{display:none;width:38px;background:#fee2e2;color:var(--danger-color);border:none;border-radius:10px;font-weight:800;font-size:1.2rem;cursor:pointer;align-items:center;justify-content:center;height:38px}
         .product-card[data-added="true"] .btn-minus{display:flex}
 
         /* -------------------- BOTTOM BAR (compact + overlay panel) -------------------- */
@@ -151,13 +158,14 @@
         .pill-btn .pill-text{display:inline-block}
         .pill-btn select{border:none;background:transparent;font-size:0.85rem;outline:none;cursor:pointer}
 
-        .toggle-complete{display:inline-flex;align-items:center;gap:6px;background:#f1f3f4;border-radius:999px;padding:6px 10px;font-size:0.78rem;flex:0 0 auto;cursor:pointer;transition:background .15s,color .15s;box-sizing:border-box}
+        .toggle-complete{display:inline-flex;align-items:center;gap:6px;background:#f1f3f4;border-radius:999px;padding:6px 10px;font-size:0.78rem;flex:0 0 auto;cursor:pointer;transition:background .15s;min-width:0;max-width:100%}
         .toggle-complete .label-text { font-weight:600; font-size:0.78rem; color: #333; display:inline-block; white-space:nowrap; max-width:120px; overflow:hidden; text-overflow:ellipsis;}
         .toggle-complete .toggle-switch{position:relative;width:34px;height:18px;background:#d1d5db;border-radius:999px;cursor:pointer}
         .toggle-complete .toggle-switch input{opacity:0;width:0;height:0}
         .toggle-complete .toggle-knob{position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:white;transition:transform .18s}
         .toggle-complete .toggle-switch input:checked + .toggle-knob{transform:translateX(16px)}
 
+        /* visual state when checkbox is checked is controlled by parent .active class */
         .toggle-complete.active{background:var(--primary-color); color:white}
         .toggle-complete.active .label-text{color:white}
         .toggle-complete.active .toggle-knob{background:white}
@@ -233,14 +241,19 @@
 
             /* ensure product grid not obscured */
             .product-grid{padding-bottom:230px}
+
+            /* stack search + filter vertically on smaller screens to avoid overlap */
+            .search-row{flex-direction:column;align-items:stretch;gap:8px}
+            .filter-box{flex:0 0 auto;width:100%}
+            .search-box{width:100%}
         }
 
         /* Additional tweaks specifically for very small screens (fix overflow and overlap) */
         @media (max-width:480px){
-            /* allow controls to wrap if needed, reduce gaps */
+            /* ensure toggle and pill are full-width and don't overflow their white container */
             .bottom-controls{flex-wrap:wrap;gap:6px;}
-
-            /* avoid compare button overflowing the viewport */
+            .pill-btn{width:100%;}
+            .toggle-complete{width:100%;justify-content:space-between;padding:8px 10px;box-sizing:border-box;}
             .bottom-bar{padding-left:10px;padding-right:10px;}
             .compare-btn{
                 min-width:100px;
@@ -248,19 +261,9 @@
                 font-size:0.92rem;
             }
 
-            /* Show compact pill + toggle in the collapsed bar: hide text and selects to prevent overlap.
-               Keep full labels in the overlay panel (which is .controls-panel). We target only the bottom-bar when not expanded. */
-            .bottom-bar:not(.expanded) .pill-btn .pill-text,
-            .bottom-bar:not(.expanded) .pill-btn select{
-                display:none;
-            }
-            .bottom-bar:not(.expanded) .toggle-complete .label-text{
-                display:none;
-            }
-
-            /* ensure toggle and pill are compact in layout */
-            .bottom-bar:not(.expanded) .pill-btn{padding:6px 8px;min-width:44px;}
-            .bottom-bar:not(.expanded) .toggle-complete{padding:6px 8px;min-width:44px;}
+            /* Make the label text wrap instead of overflowing */
+            .toggle-complete .label-text{white-space:normal;max-width:70%;}
+            .toggle-complete{justify-content:space-between;}
 
             /* small adjustments so elements never overflow container */
             .bottom-controls > *{max-width:100%;box-sizing:border-box;}
@@ -290,7 +293,7 @@
         .result-card.best{border-color:var(--primary-color);background:#f0fdf4}
         .best-badge{position:absolute;top:-10px;right:20px;background:var(--primary-color);color:white;padding:4px 12px;border-radius:20px;font-size:0.75rem;font-weight:800}
         .store-row{display:flex;align-items:center;gap:15px;margin-bottom:15px;border-bottom:1px dashed #eee;padding-bottom:15px}
-        .store-avatar{width:50px;height:50px;border-radius:10px;display:flex;align-items:center;justify-content:center;color:white;font-weight:900;font-size:1.2rem;box-shadow:0 2px 5px rgba(0,0,0,0.1)}
+        .store-avatar{width:50px;height:50px;border-radius:10px;display:flex;align-items:center;justify-content:center;color:white;font-weight:900;font-size:1.2rem;box-shadow:0 2px 5px rgba(0,0,0,0.1);flex:0 0 50px}
         .s-esselunga{background-color:var(--esselunga);color:#ffcc00;position:relative}
         .s-esselunga:after{content:"S";position:absolute;top:-5px;font-size:1.5rem}
         .s-lidl{background-color:var(--lidl);color:#FFF000;border-bottom:4px solid #E60A14}
@@ -314,10 +317,12 @@
 <header>
     <div class="header-top">
         <div class="logo">Basketly<span>.</span></div>
-        <div class="location-badge">📍 <span id="geoLabel">Posizione non impostata</span></div>
+        <div id="locationBadge" class="location-badge" role="button" tabindex="0" aria-expanded="true" title="Mostra/Nascondi impostazione posizione">
+            📍 <span id="geoLabel">Posizione non impostata</span>
+        </div>
     </div>
 
-    <div class="geo-row">
+    <div id="geoRow" class="geo-row">
         <input type="text" id="addressInput" placeholder="Inserisci indirizzo (es. Via Candiani 131, Milano)" size="35">
         <div class="range-box">
             <span style="font-size:0.8rem;">Raggio</span>
@@ -649,6 +654,16 @@
             statusEl.innerText=`Coordinate: ${userLocation.lat.toFixed(5)}, ${userLocation.lon.toFixed(5)} (raggio ${radius.toFixed(1)} km)`;
             // clear previous max savings until user triggers a new comparison
             updateMaxSavingsBox(null);
+
+            // hide the geo-row after successful geocoding so the user sees a cleaner header
+            const geoRow = document.getElementById('geoRow');
+            const locationBadge = document.getElementById('locationBadge');
+            if(geoRow && locationBadge){
+                geoRow.style.display = 'none';
+                locationBadge.setAttribute('aria-expanded', 'false');
+                // update title to indicate it can be riaperto
+                locationBadge.title = "Posizione impostata — clicca per modificare / riaprire";
+            }
         }catch(e){console.error(e);statusEl.innerText="Errore durante la geocodifica."}
     }
 
@@ -845,7 +860,7 @@
 
         box.style.display = 'flex';
         valEl.innerText = `€${diff.toFixed(2)}`;
-        detailEl.innerText = `Risparmio massimo (tra supermercati ${onlyComplete ? 'completi' : 'tutti'}): passando da ${worst.meta.name} (€${worst.total.toFixed(2)}) a ${best.meta.name} (€${best.total.toFixed(2)})`;
+        detailEl.innerText = `Risparmio massimo (tra supermercati ${onlyComplete ? 'completi' : 'tutti'}): passando da ${worst.meta.name} (€${worst.total.toFixed(2)}) a ${best.meta.name} (€${best.total.toFixed(2)}).`;
     }
 
     function runComparison(){
@@ -872,7 +887,7 @@
             let missingHtml="";
             const missingItems=[];
             const groupedLines={};
-            const categoryOrder=["Ortofrutta","Carne","Pesce","Salumi/Formaggi","Gastronomia","Latticini","Panetteria","Surgelati","Dispensa","Snack/Dolci","Colazione","Bevande","Cura Casa","Cura Persona","Animali","Casalinghi"];
+            const categoryOrder=["Ortofrutta","Carne","Pesce","Salumi/Formaggi","Gastronomia","Latticini","Panetteria","Surgelati","Dispensa","Snack/Dolci","Colazione","Bevande","Cura Casa","Cura Persona","Animali","Casalinghi","Altro"];
 
             Object.keys(basket).forEach(itemId=>{
                 const p=products.find(x=>x.id==itemId);
@@ -997,77 +1012,100 @@
     const collapseToggle = document.getElementById('collapseToggle');
     const bottomBar = document.getElementById('bottomBar');
     const controlsPanel = document.getElementById('controlsPanel');
-    const onlyCompleteCheckbox = document.getElementById('onlyComplete');
-    const onlyCompleteOverlay = document.getElementById('onlyCompleteOverlay');
 
-    collapseToggle.addEventListener('click', () => {
-        const isExpanded = bottomBar.classList.toggle('expanded');
-        // toggle ARIA on panel
-        controlsPanel.setAttribute('aria-hidden', !isExpanded);
+    // Toggle bottom controls overlay (mobile)
+    if(collapseToggle){
+        collapseToggle.addEventListener('click', () => {
+            bottomBar.classList.toggle('expanded');
+            // aria for controls panel
+            const expanded = bottomBar.classList.contains('expanded');
+            controlsPanel.setAttribute('aria-hidden', (!expanded).toString());
+        });
+    }
 
-        // sync inline -> overlay when opening
-        const sortInline = document.getElementById('sortMode');
-        const sortOverlay = document.getElementById('sortModeOverlay');
-        if (isExpanded && sortInline && sortOverlay) sortOverlay.value = sortInline.value;
-        if (isExpanded && onlyCompleteCheckbox && onlyCompleteOverlay) onlyCompleteOverlay.checked = onlyCompleteCheckbox.checked;
+    // Sync sort selects (inline <-> overlay)
+    const sortInline = document.getElementById('sortMode');
+    const sortOverlay = document.getElementById('sortModeOverlay');
+    if(sortInline && sortOverlay){
+        sortInline.addEventListener('change', ()=>{ sortOverlay.value = sortInline.value; });
+        sortOverlay.addEventListener('change', ()=>{ sortInline.value = sortOverlay.value; });
+    }
 
-        // focus compare for accessibility
-        document.getElementById('compareBtn').focus();
+    // Sync onlyComplete checkboxes and keep visual state of labels (active class)
+    const onlyInline = document.getElementById('onlyComplete');
+    const onlyOverlay = document.getElementById('onlyCompleteOverlay');
+    const toggleLabel = document.getElementById('toggleCompleteLabel');
+    const toggleLabelOverlay = document.getElementById('toggleCompleteLabelOverlay');
 
-        // Trigger visual update for toggle active state
-        updateToggleCompleteVisual();
+    function updateToggleVisual(checkbox, labelEl){
+        if(!checkbox || !labelEl) return;
+        if(checkbox.checked) labelEl.classList.add('active');
+        else labelEl.classList.remove('active');
+    }
+
+    if(onlyInline && onlyOverlay){
+        // initial sync / visual state
+        updateToggleVisual(onlyInline, toggleLabel);
+        updateToggleVisual(onlyOverlay, toggleLabelOverlay);
+        // when inline checkbox changes -> sync overlay and update visuals
+        onlyInline.addEventListener('change', ()=>{
+            onlyOverlay.checked = onlyInline.checked;
+            updateToggleVisual(onlyInline, toggleLabel);
+            updateToggleVisual(onlyOverlay, toggleLabelOverlay);
+        });
+        // when overlay checkbox changes -> sync inline and update visuals
+        onlyOverlay.addEventListener('change', ()=>{
+            onlyInline.checked = onlyOverlay.checked;
+            updateToggleVisual(onlyInline, toggleLabel);
+            updateToggleVisual(onlyOverlay, toggleLabelOverlay);
+        });
+    }
+
+    // Toggle the geo-row when clicking the location badge / label
+    const locationBadge = document.getElementById('locationBadge');
+    const geoRow = document.getElementById('geoRow');
+    if(locationBadge && geoRow){
+        // clicking toggles visibility; after geocoding geoRow will be hidden automatically,
+        // user can reopen it by clicking the badge
+        locationBadge.addEventListener('click', (e) => {
+            e.preventDefault();
+            const isHidden = window.getComputedStyle(geoRow).display === 'none';
+            if(isHidden){
+                geoRow.style.display = 'flex';
+                locationBadge.setAttribute('aria-expanded', 'true');
+                // focus input for convenience
+                const ai = document.getElementById('addressInput');
+                if(ai){ ai.focus(); ai.select(); }
+            } else {
+                geoRow.style.display = 'none';
+                locationBadge.setAttribute('aria-expanded', 'false');
+            }
+        });
+        // also allow keyboard toggling (Enter / Space)
+        locationBadge.addEventListener('keydown', (ev) => {
+            if(ev.key === 'Enter' || ev.key === ' '){
+                ev.preventDefault();
+                locationBadge.click();
+            }
+        });
+    }
+
+    // wire up search and filter to re-render product list
+    const searchInput = document.getElementById('searchInput');
+    const typeFilter = document.getElementById('typeFilter');
+    if(searchInput){ searchInput.addEventListener('input', renderProducts); }
+    if(typeFilter){ typeFilter.addEventListener('change', renderProducts); }
+
+    // initialize UI
+    document.addEventListener('DOMContentLoaded', () => {
+        updateRadiusLabel(document.getElementById('radiusSlider')?.value || 3);
+        renderProducts();
+
+        // ensure visual state of toggles matches initial checkbox values
+        if(onlyInline) updateToggleVisual(onlyInline, toggleLabel);
+        if(onlyOverlay) updateToggleVisual(onlyOverlay, toggleLabelOverlay);
     });
-
-    // sync overlay checkbox and inline checkbox and their visual states
-    function setOnlyCompleteState(val){
-        if (onlyCompleteCheckbox) onlyCompleteCheckbox.checked = val;
-        if (onlyCompleteOverlay) onlyCompleteOverlay.checked = val;
-        updateToggleCompleteVisual();
-    }
-
-    if (onlyCompleteCheckbox) {
-        onlyCompleteCheckbox.addEventListener('change', () => {
-            if (onlyCompleteOverlay) onlyCompleteOverlay.checked = onlyCompleteCheckbox.checked;
-            updateToggleCompleteVisual();
-        });
-    }
-    if (onlyCompleteOverlay) {
-        onlyCompleteOverlay.addEventListener('change', () => {
-            if (onlyCompleteCheckbox) onlyCompleteCheckbox.checked = onlyCompleteOverlay.checked;
-            updateToggleCompleteVisual();
-        });
-    }
-
-    function updateToggleCompleteVisual(){
-        const lbl = document.getElementById('toggleCompleteLabel');
-        if (lbl) {
-            if (document.getElementById('onlyComplete').checked) lbl.classList.add('active'); else lbl.classList.remove('active');
-        }
-        const lbl2 = document.getElementById('toggleCompleteLabelOverlay');
-        if (lbl2) {
-            if (document.getElementById('onlyCompleteOverlay').checked) lbl2.classList.add('active'); else lbl2.classList.remove('active');
-        }
-        // re-run comparison if modal open (this will update the box and results respecting the new onlyComplete flag)
-        if (document.getElementById("resultsModal").style.display === "block") runComparison();
-    }
-
-    // Sync sort selects (inline and overlay)
-    const sortModeInline = document.getElementById('sortMode');
-    const sortModeOverlay = document.getElementById('sortModeOverlay');
-    if (sortModeInline && sortModeOverlay) {
-        sortModeInline.addEventListener('change', () => { sortModeOverlay.value = sortModeInline.value; if (document.getElementById("resultsModal").style.display === "block") runComparison(); });
-        sortModeOverlay.addEventListener('change', () => { sortModeInline.value = sortModeOverlay.value; if (document.getElementById("resultsModal").style.display === "block") runComparison(); });
-    }
-
-    // initial visual state
-    updateToggleCompleteVisual();
-
-    // wire remaining UI
-    document.getElementById("searchInput")?.addEventListener("input", renderProducts);
-    document.getElementById("typeFilter")?.addEventListener("change", renderProducts);
-
-    // Render initial product grid
-    renderProducts();
 </script>
+
 </body>
 </html>
